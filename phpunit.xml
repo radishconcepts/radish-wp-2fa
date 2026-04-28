@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         cacheResultFile=".phpunit.cache"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         failOnRisky="true">
+    <testsuites>
+        <testsuite name="unit">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+        <exclude>
+            <file>src/Plugin.php</file>
+            <file>src/Activation.php</file>
+            <file>src/Auth/LoginInterceptor.php</file>
+            <file>src/Auth/Enforcement.php</file>
+            <file>src/Auth/ApiLogin.php</file>
+            <directory>src/Admin</directory>
+            <directory>src/Frontend</directory>
+            <directory>src/Cli</directory>
+        </exclude>
+    </source>
+</phpunit>

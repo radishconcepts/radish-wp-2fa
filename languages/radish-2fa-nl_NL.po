@@ -1,0 +1,159 @@
+# Dutch translation for Radish 2FA.
+# Copyright (C) 2026 Radish Concepts
+# This file is distributed under the GPL-2.0-or-later license.
+msgid ""
+msgstr ""
+"Project-Id-Version: Radish 2FA 0.1.0\n"
+"Report-Msgid-Bugs-To: https://www.radishconcepts.com\n"
+"PO-Revision-Date: 2026-04-28 00:00+0000\n"
+"Last-Translator: Radish Concepts\n"
+"Language-Team: Nederlands\n"
+"Language: nl_NL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Domain: radish-2fa\n"
+
+msgid "You do not have permission to do this."
+msgstr "Geen toegang."
+
+msgid "Radish 2FA"
+msgstr "Radish 2FA"
+
+msgid "Settings saved."
+msgstr "Instellingen opgeslagen."
+
+msgid "Enforced roles"
+msgstr "Verplichte rollen"
+
+msgid "Users with a checked role must set up two-factor authentication before they can access the site."
+msgstr "Gebruikers met een aangevinkte rol moeten tweestapsverificatie instellen voordat ze toegang krijgen."
+
+msgid "Roles"
+msgstr "Rollen"
+
+msgid "Super admins"
+msgstr "Super admins"
+
+msgid "Require 2FA for all super admins (strongly recommended)"
+msgstr "Verplicht 2FA voor alle super admins (sterk aanbevolen)"
+
+msgid "Save"
+msgstr "Opslaan"
+
+msgid "Two-factor authentication"
+msgstr "Tweestapsverificatie"
+
+msgid "Two-factor authentication has been reset. The user must set it up again on next login."
+msgstr "Tweestapsverificatie is gereset. De gebruiker moet bij de volgende login opnieuw instellen."
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Active"
+msgstr "Actief"
+
+#. translators: %s: date
+msgid "Set up on %s."
+msgstr "Ingesteld op %s."
+
+#. translators: %d: number of backup codes
+msgid "%d backup code available."
+msgid_plural "%d backup codes available."
+msgstr[0] "%d back-upcode beschikbaar."
+msgstr[1] "%d back-upcodes beschikbaar."
+
+#. translators: %s: date/time
+msgid "Last used: %s."
+msgstr "Laatst gebruikt: %s."
+
+msgid "Not set up."
+msgstr "Nog niet ingesteld."
+
+msgid "Reset"
+msgstr "Reset"
+
+msgid "Are you sure you want to reset 2FA for this user? All sessions will be terminated and the user must set up 2FA again on next login."
+msgstr "Weet je zeker dat je 2FA voor deze gebruiker wil resetten? Alle sessies worden beëindigd en de gebruiker moet bij de volgende login opnieuw 2FA instellen."
+
+msgid "Reset two-factor authentication"
+msgstr "Reset tweestapsverificatie"
+
+msgid "Wipes the TOTP secret and backup codes and terminates all active sessions for this user."
+msgstr "Wist het TOTP-secret en de back-upcodes en beëindigt alle actieve sessies van deze gebruiker."
+
+msgid "Invalid user."
+msgstr "Ongeldige gebruiker."
+
+msgid "Password-based API login is disabled for accounts with two-factor authentication. Use an Application Password."
+msgstr "API-login via wachtwoord is uitgeschakeld voor accounts met tweestapsverificatie. Gebruik een Application Password."
+
+msgid "The code is incorrect. Please try again."
+msgstr "De code klopt niet. Probeer het opnieuw."
+
+msgid "The code is incorrect. Please try again or use a backup code."
+msgstr "De code klopt niet. Probeer het opnieuw of gebruik een back-upcode."
+
+msgid "Template missing."
+msgstr "Template ontbreekt."
+
+msgid "Set up two-factor authentication"
+msgstr "Tweestapsverificatie instellen"
+
+msgid "Secure your account"
+msgstr "Beveilig je account"
+
+msgid "Scan the QR code below with an authenticator app (such as Google Authenticator, 1Password, or Authy) and enter the six-digit code to complete setup."
+msgstr "Scan onderstaande QR-code met een authenticator-app (bijvoorbeeld Google Authenticator, 1Password of Authy) en voer de zescijferige code in om de instelling af te ronden."
+
+msgid "Manual entry key for your app"
+msgstr "Handmatige sleutel voor in je app"
+
+msgid "Verification code"
+msgstr "Verificatiecode"
+
+msgid "Confirm and activate"
+msgstr "Bevestig en activeer"
+
+msgid "Signed in as"
+msgstr "Aangemeld als"
+
+msgid "Enter verification code"
+msgstr "Verificatiecode invoeren"
+
+msgid "Open your authenticator app and enter the six-digit code. No access to your app? Use a backup code."
+msgstr "Open je authenticator-app en vul de zescijferige code in. Geen toegang tot je app? Gebruik een back-upcode."
+
+msgid "Code"
+msgstr "Code"
+
+msgid "Sign in"
+msgstr "Inloggen"
+
+msgid "Save your backup codes"
+msgstr "Bewaar je back-upcodes"
+
+msgid "Store these codes in a safe place (a password manager or printed paper). Each code works once, in case you lose your phone or have no access to your authenticator app."
+msgstr "Bewaar deze codes op een veilige plek (een wachtwoordmanager of geprint papier). Iedere code werkt één keer, bijvoorbeeld als je je telefoon kwijt bent of geen toegang hebt tot je authenticator-app."
+
+msgid "Note:"
+msgstr "Let op:"
+
+msgid "These codes will never be shown again."
+msgstr "Deze codes worden hierna nooit meer getoond."
+
+msgid "I have saved my codes — continue"
+msgstr "Ik heb mijn codes opgeslagen — doorgaan"
+
+msgid "Session expired"
+msgstr "Sessie verlopen"
+
+msgid "This link has expired"
+msgstr "Deze link is verlopen"
+
+msgid "Your verification link has expired or has already been used. Sign in again to continue."
+msgstr "Je verificatielink is verlopen of al gebruikt. Log opnieuw in om door te gaan."
+
+msgid "Go to login page"
+msgstr "Naar inlogpagina"
