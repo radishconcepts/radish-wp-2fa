@@ -1,0 +1,10 @@
+# Default reviewers for everything in this repository.
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+*                       @radishconcepts
+
+# Security-sensitive code paths get explicit ownership.
+/src/Crypto/            @radishconcepts
+/src/Totp/              @radishconcepts
+/src/BackupCodes/       @radishconcepts
+/.github/SECURITY.md    @radishconcepts

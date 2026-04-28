@@ -4,24 +4,24 @@
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL_v2+-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 [![PHP Version](https://img.shields.io/badge/php-%5E8.1-8892BF.svg)](https://www.php.net/)
 
-Tweestapsverificatie (TOTP) voor WordPress met **harde rol-gebaseerde enforcement** en een vriendelijke frontend setup-flow voor klanten — geen QR-codes op de profielpagina, geen instructies waarvan editors flippen.
+Two-factor authentication (TOTP) for WordPress with **hard role-based enforcement** and a friendly frontend setup flow for clients — no QR codes hidden on the profile page, no instructions that confuse editors.
 
-## Belangrijkste features
+## Features
 
-- **Settings-pagina** waar je per WP-rol bepaalt wie 2FA moet gebruiken (network admin op multisite, anders Settings → Radish 2FA).
-- **Frontend setup-flow** op `/2fa/setup` en `/2fa/challenge` in plaats van een wp-admin profielpagina. Theme-overschrijving via `your-theme/radish-2fa/{template}.php`.
-- **Echt verplicht**: zonder voltooide 2FA wordt geen auth-cookie uitgegeven, en bestaande sessies worden afgekapt zodra je een rol aan enforcement toevoegt. Er is geen "skip" mogelijk.
-- **Multisite-ready**: settings + user meta zijn network-wide.
-- **Backup codes**: 10 stuks, eenmalig getoond bij setup, bcrypt-gehashed at rest.
-- **TOTP-secret encrypted at rest** met `sodium_crypto_secretbox`; sleutel wordt afgeleid uit `AUTH_KEY + SECURE_AUTH_KEY`.
-- **API-bescherming**: REST/XML-RPC password-logins worden geblokkeerd voor 2FA-users; Application Passwords blijven werken.
-- **Lockout-recovery**: constant in `wp-config.php`, WP-CLI commando, of via wp-admin.
+- **Settings page** to choose which WP roles must use 2FA (network admin on multisite, otherwise Settings → Radish 2FA).
+- **Frontend setup flow** at `/2fa/setup` and `/2fa/challenge` instead of a wp-admin profile page. Theme overrides via `your-theme/radish-2fa/{template}.php`.
+- **Truly mandatory**: without completed 2FA no auth cookie is issued, and existing sessions are terminated as soon as you add a role to enforcement. There is no "skip" option.
+- **Multisite-ready**: settings and user meta are network-wide.
+- **Backup codes**: 10 codes, shown once at setup, bcrypt-hashed at rest.
+- **TOTP secret encrypted at rest** with `sodium_crypto_secretbox`; the key is derived from `AUTH_KEY + SECURE_AUTH_KEY`.
+- **API protection**: REST/XML-RPC password logins are blocked for 2FA users; Application Passwords keep working.
+- **Lockout recovery**: constant in `wp-config.php`, WP-CLI command, or via wp-admin.
 
-## Installatie
+## Installation
 
-### Optie 1 — Composer (aanbevolen)
+### Option 1 — Composer (recommended)
 
-In je site's `composer.json`:
+In your site's `composer.json`:
 
 ```json
 {
@@ -44,9 +44,9 @@ In je site's `composer.json`:
 composer require radishconcepts/radish-wp-2fa
 ```
 
-De plugin wordt geïnstalleerd in `wp-content/plugins/radish-2fa/` (de `installer-name` in de plugin's `composer.json` zorgt dat de directory `radish-2fa` heet, niet `radish-wp-2fa`).
+The plugin installs into `wp-content/plugins/radish-2fa/` (the `installer-name` in the plugin's `composer.json` ensures the directory is named `radish-2fa`, not `radish-wp-2fa`).
 
-### Optie 2 — Handmatige installatie
+### Option 2 — Manual installation
 
 ```bash
 git clone https://github.com/radishconcepts/radish-wp-2fa.git wp-content/plugins/radish-2fa
@@ -54,90 +54,90 @@ cd wp-content/plugins/radish-2fa
 composer install --no-dev --optimize-autoloader
 ```
 
-### Activeren
+### Activation
 
-Activeer de plugin via WordPress (network-activate op multisite).
+Activate the plugin via WordPress (network-activate on multisite).
 
-**Belangrijk**: deactiveer eventuele andere 2FA-plugins (Two Factor, miniorange, etc.) — anders interfereren hun login-hooks.
+**Important**: deactivate any other 2FA plugins (Two Factor, miniOrange, etc.) — their login hooks will conflict.
 
-## Configuratie
+## Configuration
 
-1. Ga naar **Network Settings → Radish 2FA** (multisite) of **Settings → Radish 2FA** (single site).
-2. Vink de rollen aan die 2FA verplicht moeten gebruiken.
-3. Op multisite: optioneel "Verplicht 2FA voor alle super admins" (sterk aanbevolen).
-4. Klik **Save**.
+1. Go to **Network Settings → Radish 2FA** (multisite) or **Settings → Radish 2FA** (single site).
+2. Tick the roles that must use 2FA.
+3. On multisite: optionally enable "Require 2FA for all super admins" (strongly recommended).
+4. Click **Save**.
 
-Bij het opslaan worden actieve sessies van users die nu nieuw onder enforcement vallen direct beëindigd — zodat ze bij hun volgende request gevangen worden door de enforcement-flow.
+When you save, active sessions for users newly falling under enforcement are terminated immediately — so they get caught by the enforcement flow on their next request.
 
-## Hoe het werkt
+## How it works
 
 ```
-       wp-login.php (gebruikersnaam + wachtwoord)
+       wp-login.php (username + password)
                    │
                    ▼
-   Heeft hun rol 2FA verplicht? ───── nee ────▶  Normale login
+   Does their role require 2FA? ───── no ────▶  Normal login
                    │
-                  ja
+                  yes
                    │
                    ▼
-   Auth-cookie wordt onderdrukt (geen sessie)
+   Auth cookie is suppressed (no session)
                    │
         ┌──────────┴──────────┐
         │                     │
-   nog geen TOTP?         al enrolled?
+   no TOTP yet?           already enrolled?
         │                     │
         ▼                     ▼
   /2fa/setup             /2fa/challenge
-  (QR + verify           (6-digit OF
+  (QR + verify           (6-digit OR
    + backup codes)        backup code)
         │                     │
         └──────────┬──────────┘
                    ▼
          wp_set_auth_cookie()
-         redirect naar redirect_to
+         redirect to redirect_to
 ```
 
-Tokens leven 5 minuten, zijn eenmalig, en worden in `site_transient` opgeslagen onder `sha256(token)` zodat een DB-dump het token zelf niet onthult.
+Tokens live for 5 minutes, are single-use, and are stored in `site_transient` under `sha256(token)` so a database dump never reveals the token itself.
 
-## Lockout-recovery
+## Lockout recovery
 
-Drie manieren om iemand uit een 2FA-deadlock te halen.
+Three ways to get someone out of a 2FA deadlock.
 
 ### 1. `wp-config.php` constant
 
 ```php
-// Eén user
+// Single user
 define( 'RADISH_2FA_DISABLE_FOR_USER_ID', 1 );
 
-// Meerdere users
+// Multiple users
 define( 'RADISH_2FA_DISABLE_FOR_USER_ID', [ 1, 2, 5 ] );
 ```
 
-Voor de users in deze lijst slaat de plugin **alle** enforcement over — zij loggen in zonder 2FA. Gebruik dit alleen tijdens noodgevallen of voor service-accounts. Verwijder zodra niet meer nodig.
+For users in this list, the plugin skips **all** enforcement — they log in without 2FA. Only use this for emergencies or service accounts. Remove as soon as it's no longer needed.
 
 ### 2. WP-CLI
 
 ```bash
-# Toon de huidige status van een user
+# Show the current status of a user
 wp radish-2fa status arjan
 wp radish-2fa status arjan@example.com
 wp radish-2fa status 5
 
-# Reset 2FA voor een user (wist secret + backup codes, beëindigt sessies)
+# Reset 2FA for a user (clears secret + backup codes, terminates sessions)
 wp radish-2fa disable arjan
 ```
 
-`<user>` accepteert user-ID, login of email. Voor multisite voeg je `--url=…` of `--network` toe waar relevant.
+`<user>` accepts a user ID, login, or email. On multisite, add `--url=…` or `--network` where relevant.
 
 ### 3. Via wp-admin (super admin)
 
-Ga naar de **user-edit pagina** van de getroffen gebruiker (`Users → All Users → Edit`). Onderaan staat een blok **Two-factor authentication** met de actuele status (laatst ingesteld, aantal back-upcodes over, laatst gebruikt). Klik **Reset two-factor authentication** en bevestig — de secret + backup codes worden gewist en alle sessies van die user worden beëindigd.
+Go to the **user-edit page** of the affected user (`Users → All Users → Edit`). At the bottom there's a **Two-factor authentication** block showing the current status (last enrolled, backup codes remaining, last used). Click **Reset two-factor authentication** and confirm — the secret and backup codes are wiped and all sessions for that user are terminated.
 
-Op multisite is alleen `is_super_admin()` voldoende; op single-site volstaat `edit_users` capability.
+On multisite `is_super_admin()` is required; on single site the `edit_users` capability is enough.
 
-## Templates overschrijven
+## Overriding templates
 
-Plaats een eigen versie van een template in je theme:
+Place your own version of a template in your theme:
 
 ```
 your-theme/radish-2fa/setup.php
@@ -146,26 +146,26 @@ your-theme/radish-2fa/backup-codes.php
 your-theme/radish-2fa/expired.php
 ```
 
-De plugin pakt eerst de theme-versie via `locate_template()`. Als startpunt kun je de bestanden uit `radish-2fa/templates/` kopiëren.
+The plugin checks the theme version first via `locate_template()`. Use the files in `radish-2fa/templates/` as a starting point.
 
-## Vertalen
+## Translation
 
-De broncode is Engels. Een Nederlandse vertaling zit in `languages/radish-2fa-nl_NL.po` (+ gecompileerde `.mo`). Voor andere talen:
+The source code is English. A Dutch translation ships in `languages/radish-2fa-nl_NL.po` (plus the compiled `.mo`). For other languages:
 
 ```bash
-# Nieuwe taal toevoegen
+# Add a new language
 cp languages/radish-2fa.pot languages/radish-2fa-de_DE.po
-# … vertaal via Poedit, dan:
+# … translate via Poedit, then:
 msgfmt -o languages/radish-2fa-de_DE.mo languages/radish-2fa-de_DE.po
 ```
 
-WordPress laadt de juiste `.mo` automatisch op basis van site-locale.
+WordPress loads the correct `.mo` automatically based on the site locale.
 
 ## Hooks
 
-| Hook | Type | Args | Doel |
-|------|------|------|------|
-| `radish_2fa_totp_issuer` | filter | `(string) $issuer` | Pas de issuer-naam in de TOTP-app aan (default: site name). |
+| Hook | Type | Args | Purpose |
+|------|------|------|---------|
+| `radish_2fa_totp_issuer` | filter | `(string) $issuer` | Customize the issuer name shown in the TOTP app (default: site name). |
 
 ## Tests
 
@@ -174,35 +174,39 @@ composer install
 composer test
 ```
 
-Unit-tests (PHPUnit 10) dekken Crypto, Totp, BackupCodes, Nonce, Routes en Roles. Lichtgewicht WP function-stubs in `tests/bootstrap.php` — geen volledige WordPress test-suite nodig.
+Unit tests (PHPUnit 10) cover Crypto, Totp, BackupCodes, Nonce, Routes, and Roles. Lightweight WordPress function stubs in `tests/bootstrap.php` — no full WordPress test suite required.
 
-## Vereisten
+## Requirements
 
-- PHP **8.1+** (libsodium ingebouwd vanaf 7.2)
+- PHP **8.1+** (libsodium is built in from 7.2)
 - WordPress **6.2+**
 - `pragmarx/google2fa` ^8.0
 - `bacon/bacon-qr-code` ^2.0 || ^3.0
 
 ## Troubleshooting
 
-**"Deze link is verlopen" na inloggen** — Token is ouder dan 5 minuten of al gebruikt. Log opnieuw in.
+**"This link has expired" after logging in** — The token is older than 5 minutes or already used. Log in again.
 
-**404 op `/2fa/setup`** — Rewrite rules zijn niet geflusht. Bezoek de homepage van die (sub)site één keer (auto-flush via version-check), of ga naar Settings → Permalinks → Save.
+**404 on `/2fa/setup`** — Rewrite rules haven't been flushed. Visit the homepage of that (sub)site once (auto-flush via version check), or go to Settings → Permalinks → Save.
 
-**Gebruiker is locked-out** — Zie [Lockout-recovery](#lockout-recovery).
+**A user is locked out** — See [Lockout recovery](#lockout-recovery).
 
-**Two Factor / miniorange interfereert** — Deactiveer beide voor je Radish 2FA gaat gebruiken. Hun `wp_login` hooks botsen.
+**Two Factor / miniOrange interferes** — Deactivate both before using Radish 2FA. Their `wp_login` hooks conflict.
 
-**API-script werkt niet meer** — 2FA-users kunnen niet meer via wachtwoord op REST/XML-RPC. Genereer een **Application Password** (Users → Profile → Application Passwords) en gebruik die in plaats van het account-wachtwoord.
+**An API script no longer works** — 2FA users can no longer authenticate against REST/XML-RPC with their password. Generate an **Application Password** (Users → Profile → Application Passwords) and use that instead of the account password.
 
-## Beveiligingsmodel
+## Security model
 
-- **TOTP-secret** at-rest encrypted (sodium secretbox, key uit `AUTH_KEY + SECURE_AUTH_KEY` via HKDF-SHA256). DB-lek alleen is niet genoeg om secrets te recoveren.
-- **Backup codes** bcrypt-gehashed via `wp_hash_password`. Worst-case verify-tijd voor verkeerde code = ~800ms (10 hashes × ~80ms) — natural rate-limit.
-- **Login-nonce**: 128 bits entropie (`bin2hex(random_bytes(16))`), 5-min TTL, opgeslagen onder `sha256(token)`, eenmalig consumeerbaar.
-- **Auth-cookie suspending**: tijdens password-step `send_auth_cookies → __return_false`; sessie-token uit cookie-stream gegrepen via `auth_cookie` filter en direct weer vernietigd. Geen cookie verlaat ooit de server zonder voltooide 2FA.
-- **`<meta name="referrer" content="no-referrer">`** op alle 2FA-pagina's voorkomt token-leak via Referer-headers.
+- **TOTP secrets** are encrypted at rest (sodium secretbox, key derived from `AUTH_KEY + SECURE_AUTH_KEY` via HKDF-SHA256). A database leak alone is not enough to recover secrets.
+- **Backup codes** are bcrypt-hashed via `wp_hash_password`. Worst-case verify time for an incorrect code is ~800ms (10 hashes × ~80ms) — a natural rate limit.
+- **Login nonce**: 128 bits of entropy (`bin2hex(random_bytes(16))`), 5-minute TTL, stored under `sha256(token)`, single-use.
+- **Auth cookie suspension**: during the password step `send_auth_cookies → __return_false`; the session token is grabbed from the cookie stream via the `auth_cookie` filter and destroyed immediately. No cookie ever leaves the server before 2FA is complete.
+- **`<meta name="referrer" content="no-referrer">`** on every 2FA page prevents token leaks via the Referer header.
+
+## Contributing
+
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for development setup, coding standards, and the pull request workflow. Security issues should be reported privately — see [SECURITY.md](.github/SECURITY.md).
 
 ## License
 
-GPL-2.0-or-later.
+GPL-2.0-or-later. See [LICENSE](LICENSE).

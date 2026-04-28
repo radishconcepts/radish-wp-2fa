@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/radishconcepts/radish-wp-2fa/security/advisories/new
+    about: Please report security issues privately. Do not open a public issue.
+  - name: Question or how-to
+    url: https://github.com/radishconcepts/radish-wp-2fa/blob/main/.github/SUPPORT.md
+    about: GitHub issues are for bugs and feature requests. See SUPPORT.md for help.

@@ -1,0 +1,6 @@
+# Configure sponsor links for the GitHub repo's "Sponsor" button.
+# Uncomment and fill in the channels that apply.
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+
+# github: [radishconcepts]
+# custom: ["https://www.radishconcepts.com/sponsor"]
