@@ -3,7 +3,7 @@ Contributors: radishconcepts
 Tags: two-factor-authentication, 2fa, totp, security, multisite
 Requires at least: 6.2
 Tested up to: 6.7
-Stable tag: 0.1.0
+Stable tag: 0.1.1
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -104,6 +104,10 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 
 == Changelog ==
 
+= 0.1.1 =
+* Enhancement: Bump `pragmarx/google2fa` to ^9.0 (default secret key length now 32 chars upstream; this plugin already requested 32, so no functional change).
+* CI: Bump `actions/checkout` to v6 and `actions/cache` to v5 (Node.js 24 runtime).
+
 = 0.1.0 =
 * Feature: Initial release.
 * Feature: Per-role two-factor authentication enforcement with no skip option.
@@ -118,6 +122,9 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 * Feature: Dutch translation included; `.pot` file shipped for additional locales.
 
 == Upgrade Notice ==
+
+= 0.1.1 =
+Dependency refresh: pragmarx/google2fa ^9.0 and updated CI actions. No user-facing changes.
 
 = 0.1.0 =
 Initial release of Radish 2FA — enforce two-factor authentication on WordPress logins by role, with a frontend setup flow.

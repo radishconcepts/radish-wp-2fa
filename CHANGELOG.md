@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-04-28
+
+### Changed
+- Bump `pragmarx/google2fa` requirement from `^8.0` to `^9.0`. The library's default secret-key length changed from 16 to 32 characters; this plugin already requested 32 explicitly, so behavior is unchanged.
+- Bump `actions/checkout` from v4 to v6 and `actions/cache` from v4 to v5 in the CI workflow (Node.js 24 runtime).
+
 ## [0.1.0] - 2026-04-28
 
 ### Added
@@ -21,5 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `radish_2fa_totp_issuer` filter for customizing the TOTP app issuer label.
 - Dutch translation; `.pot` file shipped for additional locales.
 
-[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/radishconcepts/radish-wp-2fa/releases/tag/v0.1.0
