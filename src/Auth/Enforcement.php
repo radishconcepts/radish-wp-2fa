@@ -14,7 +14,11 @@ use RadishConcepts\TwoFactor\Storage\UserMeta;
  * (cookie-based) when the admin enables enforcement on their role, or for
  * brand-new accounts that get auto-logged-in (e.g. via password reset link).
  *
- * Hooks late on `init` so the current user is loaded but before content renders.
+ * Hooks on `template_redirect` (priority 11) so query vars are parsed and
+ * Frontend\Controller::route (priority 10) has already exited on 2FA URLs.
+ * Hooking earlier on `init` would have looped: get_query_var() returns empty
+ * before parse_query, so the "skip on 2FA pages" guard would never fire.
+ *
  * Skipped for API/cron/AJAX requests and for the 2FA pages themselves.
  */
 final class Enforcement {
@@ -26,7 +30,7 @@ final class Enforcement {
 	}
 
 	public function register(): void {
-		add_action( 'init', [ $this, 'maybe_force_setup' ], 999 );
+		add_action( 'template_redirect', [ $this, 'maybe_force_setup' ], 11 );
 	}
 
 	public function maybe_force_setup(): void {
