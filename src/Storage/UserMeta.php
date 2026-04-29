@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace RadishConcepts\TwoFactor\Storage;
 
+use RadishConcepts\TwoFactor\Methods\Method;
 use RadishConcepts\TwoFactor\Security\Crypto;
 
 /**
@@ -15,6 +16,7 @@ final class UserMeta {
 	public const META_ENROLLED_AT  = '_radish_2fa_enrolled_at';
 	public const META_BACKUP_CODES = '_radish_2fa_backup_codes';
 	public const META_LAST_USED_AT = '_radish_2fa_last_used_at';
+	public const META_METHOD       = '_radish_2fa_method';
 
 	private static ?self $instance = null;
 
@@ -23,7 +25,39 @@ final class UserMeta {
 	}
 
 	public function is_enrolled( int $user_id ): bool {
+		$method = $this->get_method( $user_id );
+
+		if ( Method::TOTP === $method ) {
+			return null !== $this->get_secret( $user_id );
+		}
+
+		if ( Method::EMAIL === $method ) {
+			return true;
+		}
+
+		// Back-compat: pre-method releases stored a TOTP secret without META_METHOD.
 		return null !== $this->get_secret( $user_id );
+	}
+
+	public function get_method( int $user_id ): ?string {
+		$stored = get_user_meta( $user_id, self::META_METHOD, true );
+		if ( is_string( $stored ) && Method::is_valid( $stored ) ) {
+			return $stored;
+		}
+
+		// Lazy back-compat: a leftover TOTP secret implies the user is on TOTP.
+		if ( null !== $this->get_secret( $user_id ) ) {
+			return Method::TOTP;
+		}
+
+		return null;
+	}
+
+	public function set_method( int $user_id, string $method ): void {
+		if ( ! Method::is_valid( $method ) ) {
+			return;
+		}
+		update_user_meta( $user_id, self::META_METHOD, $method );
 	}
 
 	public function get_secret( int $user_id ): ?string {
@@ -38,6 +72,13 @@ final class UserMeta {
 	public function set_secret( int $user_id, string $secret ): void {
 		update_user_meta( $user_id, self::META_SECRET, Crypto::encrypt( $secret ) );
 		update_user_meta( $user_id, self::META_ENROLLED_AT, time() );
+		update_user_meta( $user_id, self::META_METHOD, Method::TOTP );
+	}
+
+	public function enroll_email( int $user_id ): void {
+		delete_user_meta( $user_id, self::META_SECRET );
+		update_user_meta( $user_id, self::META_ENROLLED_AT, time() );
+		update_user_meta( $user_id, self::META_METHOD, Method::EMAIL );
 	}
 
 	public function clear( int $user_id ): void {
@@ -45,6 +86,7 @@ final class UserMeta {
 		delete_user_meta( $user_id, self::META_ENROLLED_AT );
 		delete_user_meta( $user_id, self::META_BACKUP_CODES );
 		delete_user_meta( $user_id, self::META_LAST_USED_AT );
+		delete_user_meta( $user_id, self::META_METHOD );
 	}
 
 	/**

@@ -183,3 +183,59 @@ html, body {
 
 .r2fa-meta a { color: var(--r2fa-accent); text-decoration: none; }
 .r2fa-meta a:hover { text-decoration: underline; }
+
+.r2fa-info {
+	background: #eef2ff;
+	color: #3730a3;
+	border: 1px solid #c7d2fe;
+	border-radius: 6px;
+	padding: 0.75rem 0.875rem;
+	font-size: 0.875rem;
+	margin-bottom: 1rem;
+}
+
+.r2fa-methods {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.r2fa-method {
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+	padding: 0.875rem 1rem;
+	border: 1px solid var(--r2fa-border);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.r2fa-method:hover { border-color: var(--r2fa-accent); }
+
+.r2fa-method input[type="radio"] {
+	margin-top: 0.2rem;
+	flex-shrink: 0;
+}
+
+.r2fa-method-label { display: block; }
+.r2fa-method-label strong { display: block; font-size: 0.95rem; }
+.r2fa-method-label small { display: block; color: var(--r2fa-muted); font-size: 0.8rem; margin-top: 0.15rem; }
+
+.r2fa-resend {
+	margin-top: 0.75rem;
+	text-align: center;
+}
+
+.r2fa-link {
+	background: transparent;
+	border: 0;
+	color: var(--r2fa-accent);
+	font-size: 0.85rem;
+	cursor: pointer;
+	padding: 0.25rem 0.5rem;
+}
+
+.r2fa-link:hover { text-decoration: underline; }
+.r2fa-link[disabled] { color: var(--r2fa-muted); cursor: not-allowed; text-decoration: none; }

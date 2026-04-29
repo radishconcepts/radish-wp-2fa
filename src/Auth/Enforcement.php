@@ -6,7 +6,6 @@ namespace RadishConcepts\TwoFactor\Auth;
 
 use RadishConcepts\TwoFactor\Roles;
 use RadishConcepts\TwoFactor\Routes;
-use RadishConcepts\TwoFactor\Security\Totp;
 use RadishConcepts\TwoFactor\Storage\UserMeta;
 
 /**
@@ -57,8 +56,7 @@ final class Enforcement {
 			Nonce::MODE_SETUP,
 			$this->current_url(),
 			[
-				'remember'       => true,
-				'pending_secret' => Totp::instance()->generate_secret(),
+				'remember' => true,
 			]
 		);
 

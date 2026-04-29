@@ -47,12 +47,14 @@ final class Commands {
 	public function cmd_status( array $args ): void {
 		$user        = $this->resolve_user( $args[0] ?? '' );
 		$is_enrolled = UserMeta::instance()->is_enrolled( $user->ID );
+		$method      = UserMeta::instance()->get_method( $user->ID );
 		$codes_left  = UserMeta::instance()->count_backup_codes( $user->ID );
 		$enrolled_at = (int) get_user_meta( $user->ID, UserMeta::META_ENROLLED_AT, true );
 		$last_used   = (int) get_user_meta( $user->ID, UserMeta::META_LAST_USED_AT, true );
 
 		WP_CLI::log( sprintf( 'User:           %s (#%d)', $user->user_login, $user->ID ) );
 		WP_CLI::log( sprintf( 'Enrolled:       %s', $is_enrolled ? 'yes' : 'no' ) );
+		WP_CLI::log( sprintf( 'Method:         %s', $method ?? '—' ) );
 		WP_CLI::log( sprintf( 'Enrolled at:    %s', $enrolled_at ? wp_date( 'Y-m-d H:i', $enrolled_at ) : '—' ) );
 		WP_CLI::log( sprintf( 'Backup codes:   %d', $codes_left ) );
 		WP_CLI::log( sprintf( 'Last used:      %s', $last_used ? wp_date( 'Y-m-d H:i', $last_used ) : '—' ) );

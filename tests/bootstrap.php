@@ -19,6 +19,9 @@ if ( ! defined( 'SECURE_AUTH_KEY' ) ) {
 if ( ! defined( 'MINUTE_IN_SECONDS' ) ) {
 	define( 'MINUTE_IN_SECONDS', 60 );
 }
+if ( ! defined( 'HOUR_IN_SECONDS' ) ) {
+	define( 'HOUR_IN_SECONDS', 60 * MINUTE_IN_SECONDS );
+}
 if ( ! defined( 'RADISH_2FA_DIR' ) ) {
 	define( 'RADISH_2FA_DIR', dirname( __DIR__ ) . '/' );
 }
@@ -31,12 +34,13 @@ if ( ! defined( 'RADISH_2FA_VERSION' ) ) {
  *
  * @var array<string,mixed>
  */
-global $rt2fa_test_transients, $rt2fa_test_options, $rt2fa_test_user_meta, $rt2fa_test_super_admin, $rt2fa_test_actions;
+global $rt2fa_test_transients, $rt2fa_test_options, $rt2fa_test_user_meta, $rt2fa_test_super_admin, $rt2fa_test_actions, $rt2fa_test_mails;
 $rt2fa_test_transients   = [];
 $rt2fa_test_options      = [];
 $rt2fa_test_user_meta    = [];
 $rt2fa_test_super_admin  = false;
 $rt2fa_test_actions      = [];
+$rt2fa_test_mails        = [];
 
 if ( ! function_exists( 'add_action' ) ) {
 	function add_action( string $hook, $callback, int $priority = 10, int $accepted_args = 1 ): bool {
@@ -194,11 +198,83 @@ if ( ! class_exists( 'WP_User' ) ) {
 		public int $ID;
 		public array $roles;
 		public string $user_login;
+		public string $user_email = '';
 
-		public function __construct( int $id, array $roles = [], string $login = '' ) {
+		public function __construct( int $id, array $roles = [], string $login = '', string $email = '' ) {
 			$this->ID         = $id;
 			$this->roles      = $roles;
 			$this->user_login = $login;
+			$this->user_email = $email;
 		}
+	}
+}
+
+if ( ! function_exists( 'get_user_meta' ) ) {
+	function get_user_meta( int $user_id, string $key, bool $single = false ) {
+		global $rt2fa_test_user_meta;
+		$value = $rt2fa_test_user_meta[ $user_id ][ $key ] ?? '';
+
+		return $single ? $value : ( '' === $value ? [] : [ $value ] );
+	}
+}
+
+if ( ! function_exists( 'update_user_meta' ) ) {
+	function update_user_meta( int $user_id, string $key, $value ): bool {
+		global $rt2fa_test_user_meta;
+		$rt2fa_test_user_meta[ $user_id ][ $key ] = $value;
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'delete_user_meta' ) ) {
+	function delete_user_meta( int $user_id, string $key ): bool {
+		global $rt2fa_test_user_meta;
+		unset( $rt2fa_test_user_meta[ $user_id ][ $key ] );
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'is_email' ) ) {
+	function is_email( string $email ) {
+		return false === filter_var( $email, FILTER_VALIDATE_EMAIL ) ? false : $email;
+	}
+}
+
+if ( ! function_exists( 'wp_mail' ) ) {
+	function wp_mail( $to, string $subject, string $message, $headers = '', $attachments = [] ): bool {
+		global $rt2fa_test_mails;
+		$rt2fa_test_mails[] = [
+			'to'      => $to,
+			'subject' => $subject,
+			'message' => $message,
+		];
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'get_network' ) ) {
+	function get_network() {
+		return null;
+	}
+}
+
+if ( ! function_exists( '__' ) ) {
+	function __( string $text, string $domain = 'default' ): string {
+		return $text;
+	}
+}
+
+if ( ! function_exists( 'esc_html__' ) ) {
+	function esc_html__( string $text, string $domain = 'default' ): string {
+		return $text;
+	}
+}
+
+if ( ! function_exists( '_n' ) ) {
+	function _n( string $single, string $plural, int $number, string $domain = 'default' ): string {
+		return 1 === $number ? $single : $plural;
 	}
 }

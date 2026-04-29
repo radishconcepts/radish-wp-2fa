@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace RadishConcepts\TwoFactor;
 
 use RadishConcepts\TwoFactor\Admin\Reset;
+use RadishConcepts\TwoFactor\Admin\SelfManage;
 use RadishConcepts\TwoFactor\Admin\Settings;
 use RadishConcepts\TwoFactor\Auth\ApiLogin;
 use RadishConcepts\TwoFactor\Auth\Enforcement;
@@ -36,6 +37,7 @@ final class Plugin {
 		Controller::instance()->register();
 		Enforcement::instance()->register();
 		Reset::instance()->register();
+		SelfManage::instance()->register();
 		Commands::instance()->register();
 	}
 

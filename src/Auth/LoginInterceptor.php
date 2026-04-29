@@ -6,7 +6,6 @@ namespace RadishConcepts\TwoFactor\Auth;
 
 use RadishConcepts\TwoFactor\Roles;
 use RadishConcepts\TwoFactor\Routes;
-use RadishConcepts\TwoFactor\Security\Totp;
 use RadishConcepts\TwoFactor\Storage\UserMeta;
 use WP_Session_Tokens;
 use WP_User;
@@ -77,9 +76,6 @@ final class LoginInterceptor {
 		$mode = UserMeta::instance()->is_enrolled( $user->ID ) ? Nonce::MODE_CHALLENGE : Nonce::MODE_SETUP;
 
 		$extra = [ 'remember' => ! empty( $_POST['rememberme'] ) ];
-		if ( Nonce::MODE_SETUP === $mode ) {
-			$extra['pending_secret'] = Totp::instance()->generate_secret();
-		}
 
 		$token = Nonce::instance()->create( $user->ID, $mode, $this->resolve_redirect_to(), $extra );
 

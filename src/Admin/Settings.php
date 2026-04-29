@@ -4,6 +4,8 @@ declare( strict_types=1 );
 
 namespace RadishConcepts\TwoFactor\Admin;
 
+use RadishConcepts\TwoFactor\Methods\Method;
+use RadishConcepts\TwoFactor\Storage\UserMeta;
 use WP_Roles;
 use WP_Session_Tokens;
 
@@ -16,6 +18,7 @@ final class Settings {
 	private const DEFAULTS = [
 		'enforced_roles'       => [],
 		'enforce_super_admins' => true,
+		'enabled_methods'      => [ Method::TOTP ],
 	];
 
 	private static ?self $instance = null;
@@ -76,6 +79,36 @@ final class Settings {
 				<?php wp_nonce_field( self::NONCE_KEY ); ?>
 				<input type="hidden" name="action" value="radish_2fa_save_settings">
 
+				<h2><?php esc_html_e( 'Authentication methods', 'radish-2fa' ); ?></h2>
+				<p class="description">
+					<?php esc_html_e( 'Choose which two-factor methods users can pick from. Authenticator app is always available; email is opt-in.', 'radish-2fa' ); ?>
+				</p>
+
+				<table class="form-table" role="presentation">
+					<tbody>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Methods', 'radish-2fa' ); ?></th>
+						<td>
+							<fieldset>
+								<legend class="screen-reader-text"><?php esc_html_e( 'Methods', 'radish-2fa' ); ?></legend>
+								<label style="display:block; margin-bottom:.4em;">
+									<input type="checkbox" checked disabled>
+									<?php esc_html_e( 'Authenticator app (TOTP)', 'radish-2fa' ); ?>
+									<code style="margin-left:.4em; font-size:.85em; color:#666;">totp</code>
+									<span class="description" style="display:block; margin-left:1.6em;"><?php esc_html_e( 'Always available.', 'radish-2fa' ); ?></span>
+								</label>
+								<label style="display:block; margin-bottom:.4em;">
+									<input type="checkbox" name="enabled_methods[]" value="<?php echo esc_attr( Method::EMAIL ); ?>" <?php checked( in_array( Method::EMAIL, $settings['enabled_methods'], true ) ); ?>>
+									<?php esc_html_e( 'Email', 'radish-2fa' ); ?>
+									<code style="margin-left:.4em; font-size:.85em; color:#666;">email</code>
+									<span class="description" style="display:block; margin-left:1.6em;"><?php esc_html_e( 'Send a one-time code to the user’s WordPress profile email.', 'radish-2fa' ); ?></span>
+								</label>
+							</fieldset>
+						</td>
+					</tr>
+					</tbody>
+				</table>
+
 				<h2><?php esc_html_e( 'Enforced roles', 'radish-2fa' ); ?></h2>
 				<p class="description">
 					<?php esc_html_e( 'Users with a checked role must set up two-factor authentication before they can access the site.', 'radish-2fa' ); ?>
@@ -135,15 +168,26 @@ final class Settings {
 
 		$enforce_super_admins = ! empty( $_POST['enforce_super_admins'] );
 
+		$enabled_methods = isset( $_POST['enabled_methods'] ) && is_array( $_POST['enabled_methods'] )
+			? array_map( 'sanitize_key', wp_unslash( $_POST['enabled_methods'] ) )
+			: [];
+		$enabled_methods = array_values( array_intersect( $enabled_methods, Method::all() ) );
+		// TOTP is always available — guarantee it stays in the list.
+		if ( ! in_array( Method::TOTP, $enabled_methods, true ) ) {
+			array_unshift( $enabled_methods, Method::TOTP );
+		}
+
 		$old = $this->get();
 		$new = [
 			'enforced_roles'       => $enforced_roles,
 			'enforce_super_admins' => $enforce_super_admins,
+			'enabled_methods'      => $enabled_methods,
 		];
 
 		$this->update( $new );
 
 		$this->kill_sessions_for_newly_enforced( $old, $new );
+		$this->kill_sessions_for_disabled_methods( $old, $new );
 
 		wp_safe_redirect( add_query_arg( 'updated', '1', $this->settings_page_url() ) );
 		exit;
@@ -196,6 +240,55 @@ final class Settings {
 		foreach ( array_keys( $user_ids ) as $user_id ) {
 			WP_Session_Tokens::get_instance( (int) $user_id )->destroy_all();
 		}
+	}
+
+	/**
+	 * Kill sessions for users enrolled in a method that was just disabled, so
+	 * their next request lands on the setup chooser with only the still-allowed
+	 * methods.
+	 */
+	private function kill_sessions_for_disabled_methods( array $old, array $new ): void {
+		$removed = array_diff( (array) ( $old['enabled_methods'] ?? [] ), (array) ( $new['enabled_methods'] ?? [] ) );
+		if ( empty( $removed ) ) {
+			return;
+		}
+
+		$sites = is_multisite()
+			? get_sites( [ 'number' => 0 ] )
+			: [ (object) [ 'blog_id' => get_current_blog_id() ] ];
+
+		foreach ( $sites as $site ) {
+			if ( is_multisite() ) {
+				switch_to_blog( (int) $site->blog_id );
+			}
+
+			$ids = get_users( [
+				'fields'      => 'ID',
+				'number'      => -1,
+				'meta_key'    => UserMeta::META_METHOD,
+				'meta_value'  => $removed,
+				'meta_compare' => 'IN',
+			] );
+
+			foreach ( $ids as $id ) {
+				WP_Session_Tokens::get_instance( (int) $id )->destroy_all();
+			}
+
+			if ( is_multisite() ) {
+				restore_current_blog();
+			}
+		}
+	}
+
+	public function enabled_methods(): array {
+		$settings = $this->get();
+		$methods  = (array) ( $settings['enabled_methods'] ?? [] );
+
+		return array_values( array_intersect( $methods, Method::all() ) ) ?: [ Method::TOTP ];
+	}
+
+	public function is_method_enabled( string $method ): bool {
+		return in_array( $method, $this->enabled_methods(), true );
 	}
 
 	public function get(): array {

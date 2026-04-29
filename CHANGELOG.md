@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Email-based 2FA as an opt-in alternative to TOTP. Admins enable it under **Settings → Two-Factor → Authentication methods**; users with multiple methods available pick one on the setup chooser.
+- `Methods\Method` value object centralising the supported method identifiers (`totp`, `email`) and their translatable labels.
+- `Security\EmailOtp` (6-digit numeric code, 10-minute TTL, bcrypt-hashed at rest) and `Security\EmailMailer` (responsive HTML + plain-text multipart message, filterable subject/body via `radish_2fa_email_subject` / `radish_2fa_email_html` / `radish_2fa_email_alt_body`).
+- `Security\EmailRateLimit` enforcing a 30-second cooldown and max 5 sends per rolling hour per user, backed by site transients (multisite-safe).
+- `Admin\SelfManage` self-service section on the user's own profile screen: shows status, current method, enrolled-at, last-used and remaining backup codes, with **Change method** and **Reset 2FA** buttons.
+- Theme-overridable templates `setup-method-chooser.php`, `setup-email.php`, and `challenge-email.php`.
+- `UserMeta::META_METHOD` plus `get_method()`, `set_method()`, and `enroll_email()` helpers; `wp radish-2fa status` now reports the active method.
+- Tests covering `Method`, `EmailOtp`, `EmailRateLimit`, and the new method-aware `UserMeta` paths.
+
+### Changed
+- Disabling a previously enabled method now destroys the sessions of users currently enrolled in it, forcing them through the setup chooser on the next request.
+- `Auth\Enforcement` and `Auth\LoginInterceptor` no longer pre-generate a TOTP secret on the setup nonce — the secret is created only after the user picks TOTP on the chooser, so abandoning halfway never wastes a secret.
+- `is_enrolled()` is now method-aware (TOTP requires a stored secret; email enrolment is sufficient on its own) with a back-compat path for users from pre-method releases.
+
 ## [0.1.2] - 2026-04-29
 
 ### Fixed
