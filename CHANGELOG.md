@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-04-29
+
+### Fixed
+- Resolve `ERR_TOO_MANY_REDIRECTS` on `/2fa/setup/` for users who had an active session when the plugin was activated. `Auth\Enforcement` now hooks on `template_redirect` (priority 11) instead of `init` (priority 999); on `init` the skip-on-2FA-pages guard `get_query_var( Routes::QUERY_VAR )` always returned empty (parse_query had not run yet), so every request created a fresh nonce and redirected again.
+
 ## [0.1.1] - 2026-04-28
 
 ### Changed
@@ -27,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `radish_2fa_totp_issuer` filter for customizing the TOTP app issuer label.
 - Dutch translation; `.pot` file shipped for additional locales.
 
-[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/radishconcepts/radish-wp-2fa/releases/tag/v0.1.0

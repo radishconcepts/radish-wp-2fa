@@ -3,7 +3,7 @@ Contributors: radishconcepts
 Tags: two-factor-authentication, 2fa, totp, security, multisite
 Requires at least: 6.2
 Tested up to: 6.7
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -104,6 +104,9 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 
 == Changelog ==
 
+= 0.1.2 =
+* Fix: Resolve "ERR_TOO_MANY_REDIRECTS" loop on `/2fa/setup/` for users with an active session at activation time. Enforcement now hooks on `template_redirect` (priority 11) instead of `init` (priority 999) so its skip-on-2FA-pages guard can read the parsed query var.
+
 = 0.1.1 =
 * Enhancement: Bump `pragmarx/google2fa` to ^9.0 (default secret key length now 32 chars upstream; this plugin already requested 32, so no functional change).
 * CI: Bump `actions/checkout` to v6 and `actions/cache` to v5 (Node.js 24 runtime).
@@ -122,6 +125,9 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 * Feature: Dutch translation included; `.pot` file shipped for additional locales.
 
 == Upgrade Notice ==
+
+= 0.1.2 =
+Fixes a redirect loop on `/2fa/setup/` that affected sites where users had an active session when the plugin was activated. Recommended for all installs.
 
 = 0.1.1 =
 Dependency refresh: pragmarx/google2fa ^9.0 and updated CI actions. No user-facing changes.
