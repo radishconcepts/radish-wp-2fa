@@ -3,7 +3,7 @@ Contributors: radishconcepts
 Tags: two-factor-authentication, 2fa, totp, security, multisite
 Requires at least: 6.2
 Tested up to: 6.7
-Stable tag: 0.1.2
+Stable tag: 0.2.0
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -104,6 +104,17 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 
 == Changelog ==
 
+= 0.2.0 =
+* Feature: Email-based 2FA as an opt-in alternative to TOTP. Admins enable it under Settings → Two-Factor → Authentication methods; users with multiple methods available pick one on the new setup chooser.
+* Feature: 6-digit numeric email OTP with 10-minute TTL, bcrypt-hashed at rest. HTML + plain-text multipart message; subject and body filterable via `radish_2fa_email_subject`, `radish_2fa_email_html`, and `radish_2fa_email_alt_body`.
+* Feature: Per-user rate limiting on email OTP sends — 30s cooldown and max 5 sends per rolling hour, multisite-safe.
+* Feature: Self-service section on the user's own profile screen with status, current method, enrollment/last-used timestamps, remaining backup codes, and Change-method / Reset-2FA buttons.
+* Feature: Theme-overridable templates `setup-method-chooser.php`, `setup-email.php`, and `challenge-email.php`.
+* Feature: `wp radish-2fa status` now reports the active method.
+* Enhancement: Disabling a previously enabled method destroys sessions of users currently enrolled in it, forcing them through the setup chooser on the next request.
+* Enhancement: Setup-nonce no longer pre-generates a TOTP secret. The secret is created only after the user picks TOTP on the chooser, so abandoning halfway never wastes a secret.
+* i18n: Dutch translations updated for all new strings; `radish-2fa.pot` regenerated.
+
 = 0.1.2 =
 * Fix: Resolve "ERR_TOO_MANY_REDIRECTS" loop on `/2fa/setup/` for users with an active session at activation time. Enforcement now hooks on `template_redirect` (priority 11) instead of `init` (priority 999) so its skip-on-2FA-pages guard can read the parsed query var.
 
@@ -125,6 +136,9 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 * Feature: Dutch translation included; `.pot` file shipped for additional locales.
 
 == Upgrade Notice ==
+
+= 0.2.0 =
+Adds email-based 2FA as an opt-in alternative to TOTP, plus a self-service profile section. Existing TOTP users are unaffected; admins must explicitly enable email under Settings → Two-Factor before users can choose it.
 
 = 0.1.2 =
 Fixes a redirect loop on `/2fa/setup/` that affected sites where users had an active session when the plugin was activated. Recommended for all installs.

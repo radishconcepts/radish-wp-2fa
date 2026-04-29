@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-29
+
 ### Added
 - Email-based 2FA as an opt-in alternative to TOTP. Admins enable it under **Settings → Two-Factor → Authentication methods**; users with multiple methods available pick one on the setup chooser.
 - `Methods\Method` value object centralising the supported method identifiers (`totp`, `email`) and their translatable labels.
@@ -48,7 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `radish_2fa_totp_issuer` filter for customizing the TOTP app issuer label.
 - Dutch translation; `.pot` file shipped for additional locales.
 
-[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/radishconcepts/radish-wp-2fa/releases/tag/v0.1.0
