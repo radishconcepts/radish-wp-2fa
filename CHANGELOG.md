@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Theme-overridable templates `setup-method-chooser.php`, `setup-email.php`, and `challenge-email.php`.
 - `UserMeta::META_METHOD` plus `get_method()`, `set_method()`, and `enroll_email()` helpers; `wp radish-2fa status` now reports the active method.
 - Tests covering `Method`, `EmailOtp`, `EmailRateLimit`, and the new method-aware `UserMeta` paths.
+- Dutch translations for all new email-method, method-chooser, and self-service strings; `radish-2fa.pot` regenerated.
 
 ### Changed
 - Disabling a previously enabled method now destroys the sessions of users currently enrolled in it, forcing them through the setup chooser on the next request.

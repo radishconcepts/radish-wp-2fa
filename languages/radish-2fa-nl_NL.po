@@ -4,7 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Radish 2FA 0.1.0\n"
-"Report-Msgid-Bugs-To: https://www.radishconcepts.com\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/radish-2fa\n"
+"POT-Creation-Date: 2026-04-29T20:28:06+00:00\n"
 "PO-Revision-Date: 2026-04-28 00:00+0000\n"
 "Last-Translator: Radish Concepts\n"
 "Language-Team: Nederlands\n"
@@ -15,145 +16,463 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Domain: radish-2fa\n"
 
-msgid "You do not have permission to do this."
-msgstr "Geen toegang."
-
+#. Plugin Name of the plugin
+#: radish-2fa.php src/Admin/Settings.php:43 src/Admin/Settings.php:44
+#: src/Admin/Settings.php:53 src/Admin/Settings.php:54
+#: src/Admin/Settings.php:72
 msgid "Radish 2FA"
 msgstr "Radish 2FA"
 
-msgid "Settings saved."
-msgstr "Instellingen opgeslagen."
+#. Plugin URI of the plugin
+#: radish-2fa.php
+msgid "https://github.com/radishconcepts/radish-wp-2fa"
+msgstr "https://github.com/radishconcepts/radish-wp-2fa"
 
-msgid "Enforced roles"
-msgstr "Verplichte rollen"
+#. Description of the plugin
+#: radish-2fa.php
+msgid ""
+"Enforceable, frontend-first two-factor authentication (TOTP) for WordPress, "
+"with role-based hard enforcement."
+msgstr "Afdwingbare, frontend-georiënteerde tweestapsverificatie (TOTP) voor WordPress, met harde rol-gebaseerde verplichting."
 
-msgid "Users with a checked role must set up two-factor authentication before they can access the site."
-msgstr "Gebruikers met een aangevinkte rol moeten tweestapsverificatie instellen voordat ze toegang krijgen."
+#. Author of the plugin
+#: radish-2fa.php
+msgid "Radish Concepts"
+msgstr "Radish Concepts"
 
-msgid "Roles"
-msgstr "Rollen"
+#. Author URI of the plugin
+#: radish-2fa.php
+msgid "https://www.radishconcepts.com"
+msgstr "https://www.radishconcepts.com"
 
-msgid "Super admins"
-msgstr "Super admins"
-
-msgid "Require 2FA for all super admins (strongly recommended)"
-msgstr "Verplicht 2FA voor alle super admins (sterk aanbevolen)"
-
-msgid "Save"
-msgstr "Opslaan"
-
+#: src/Admin/Reset.php:47 src/Admin/SelfManage.php:59
+#: templates/challenge-email.php:19 templates/challenge.php:16
 msgid "Two-factor authentication"
 msgstr "Tweestapsverificatie"
 
-msgid "Two-factor authentication has been reset. The user must set it up again on next login."
-msgstr "Tweestapsverificatie is gereset. De gebruiker moet bij de volgende login opnieuw instellen."
+#: src/Admin/Reset.php:51
+msgid ""
+"Two-factor authentication has been reset. The user must set it up again on "
+"next login."
+msgstr ""
+"Tweestapsverificatie is gereset. De gebruiker moet bij de volgende login "
+"opnieuw instellen."
 
+#: src/Admin/Reset.php:57 src/Admin/SelfManage.php:70
 msgid "Status"
 msgstr "Status"
 
+#: src/Admin/Reset.php:60
 msgid "Active"
 msgstr "Actief"
 
 #. translators: %s: date
+#: src/Admin/Reset.php:66
 msgid "Set up on %s."
 msgstr "Ingesteld op %s."
 
 #. translators: %d: number of backup codes
+#: src/Admin/Reset.php:75
 msgid "%d backup code available."
 msgid_plural "%d backup codes available."
 msgstr[0] "%d back-upcode beschikbaar."
 msgstr[1] "%d back-upcodes beschikbaar."
 
 #. translators: %s: date/time
+#: src/Admin/Reset.php:84
 msgid "Last used: %s."
 msgstr "Laatst gebruikt: %s."
 
+#: src/Admin/Reset.php:91
 msgid "Not set up."
 msgstr "Nog niet ingesteld."
 
+#: src/Admin/Reset.php:98
 msgid "Reset"
 msgstr "Reset"
 
-msgid "Are you sure you want to reset 2FA for this user? All sessions will be terminated and the user must set up 2FA again on next login."
-msgstr "Weet je zeker dat je 2FA voor deze gebruiker wil resetten? Alle sessies worden beëindigd en de gebruiker moet bij de volgende login opnieuw 2FA instellen."
+#: src/Admin/Reset.php:114
+msgid ""
+"Are you sure you want to reset 2FA for this user? All sessions will be "
+"terminated and the user must set up 2FA again on next login."
+msgstr ""
+"Weet je zeker dat je 2FA voor deze gebruiker wil resetten? Alle sessies "
+"worden beëindigd en de gebruiker moet bij de volgende login opnieuw 2FA "
+"instellen."
 
+#: src/Admin/Reset.php:115
 msgid "Reset two-factor authentication"
 msgstr "Reset tweestapsverificatie"
 
-msgid "Wipes the TOTP secret and backup codes and terminates all active sessions for this user."
-msgstr "Wist het TOTP-secret en de back-upcodes en beëindigt alle actieve sessies van deze gebruiker."
+#: src/Admin/Reset.php:118
+msgid ""
+"Wipes the TOTP secret and backup codes and terminates all active sessions "
+"for this user."
+msgstr ""
+"Wist het TOTP-secret en de back-upcodes en beëindigt alle actieve sessies "
+"van deze gebruiker."
 
+#: src/Admin/Reset.php:129 src/Admin/Settings.php:63 src/Admin/Settings.php:157
+msgid "You do not have permission to do this."
+msgstr "Geen toegang."
+
+#: src/Admin/Reset.php:138
 msgid "Invalid user."
 msgstr "Ongeldige gebruiker."
 
-msgid "Password-based API login is disabled for accounts with two-factor authentication. Use an Application Password."
-msgstr "API-login via wachtwoord is uitgeschakeld voor accounts met tweestapsverificatie. Gebruik een Application Password."
+#: src/Admin/SelfManage.php:63
+msgid ""
+"Two-factor authentication has been reset. You will be asked to set it up "
+"again on your next sign-in."
+msgstr "Tweestapsverificatie is opnieuw ingesteld. Bij je volgende inlog vragen we je om hem opnieuw in te stellen."
 
+#: src/Admin/SelfManage.php:73
+msgid "Enabled"
+msgstr "Ingeschakeld"
+
+#: src/Admin/SelfManage.php:75
+msgid ""
+"Not enabled — you will be asked to set it up at next sign-in if your role "
+"requires it."
+msgstr "Niet ingeschakeld — als je rol dit vereist, vragen we je om hem in te stellen bij je volgende inlog."
+
+#: src/Admin/SelfManage.php:82
+msgid "Method"
+msgstr "Methode"
+
+#: src/Admin/SelfManage.php:89
+msgid "Enrolled at"
+msgstr "Aangemeld op"
+
+#: src/Admin/SelfManage.php:96
+msgid "Last used"
+msgstr "Laatst gebruikt"
+
+#: src/Admin/SelfManage.php:103
+msgid "Backup codes"
+msgstr "Back-upcodes"
+
+#: src/Admin/SelfManage.php:104
+msgid "remaining"
+msgstr "resterend"
+
+#: src/Admin/SelfManage.php:114
+msgid "Change method"
+msgstr "Methode wijzigen"
+
+#: src/Admin/SelfManage.php:119
+msgid ""
+"This will turn off two-factor authentication for your account. You can set "
+"it up again afterwards. Continue?"
+msgstr "Hiermee schakel je tweestapsverificatie voor je account uit. Je kunt hem daarna opnieuw instellen. Doorgaan?"
+
+#: src/Admin/SelfManage.php:122
+msgid "Reset 2FA"
+msgstr "2FA opnieuw instellen"
+
+#: src/Admin/SelfManage.php:133 src/Admin/SelfManage.php:158
+msgid "You must be signed in."
+msgstr "Je moet ingelogd zijn."
+
+#: src/Admin/Settings.php:75
+msgid "Settings saved."
+msgstr "Instellingen opgeslagen."
+
+#: src/Admin/Settings.php:82
+msgid "Authentication methods"
+msgstr "Verificatiemethoden"
+
+#: src/Admin/Settings.php:84
+msgid ""
+"Choose which two-factor methods users can pick from. Authenticator app is "
+"always available; email is opt-in."
+msgstr "Kies welke tweestapsverificatiemethoden gebruikers mogen kiezen. Authenticator-app is altijd beschikbaar; e-mail is optioneel."
+
+#: src/Admin/Settings.php:90 src/Admin/Settings.php:93
+msgid "Methods"
+msgstr "Methoden"
+
+#: src/Admin/Settings.php:96
+msgid "Authenticator app (TOTP)"
+msgstr "Authenticator-app (TOTP)"
+
+#: src/Admin/Settings.php:98
+msgid "Always available."
+msgstr "Altijd beschikbaar."
+
+#: src/Admin/Settings.php:102 src/Methods/Method.php:31
+msgid "Email"
+msgstr "E-mail"
+
+#: src/Admin/Settings.php:104
+msgid "Send a one-time code to the user’s WordPress profile email."
+msgstr "Stuur een eenmalige code naar het e-mailadres in het WordPress-profiel van de gebruiker."
+
+#: src/Admin/Settings.php:112
+msgid "Enforced roles"
+msgstr "Verplichte rollen"
+
+#: src/Admin/Settings.php:114
+msgid ""
+"Users with a checked role must set up two-factor authentication before they "
+"can access the site."
+msgstr ""
+"Gebruikers met een aangevinkte rol moeten tweestapsverificatie instellen "
+"voordat ze toegang krijgen."
+
+#: src/Admin/Settings.php:120 src/Admin/Settings.php:123
+msgid "Roles"
+msgstr "Rollen"
+
+#: src/Admin/Settings.php:137
+msgid "Super admins"
+msgstr "Super admins"
+
+#: src/Admin/Settings.php:141
+msgid "Require 2FA for all super admins (strongly recommended)"
+msgstr "Verplicht 2FA voor alle super admins (sterk aanbevolen)"
+
+#: src/Admin/Settings.php:149
+msgid "Save"
+msgstr "Opslaan"
+
+#: src/Auth/ApiLogin.php:47
+msgid ""
+"Password-based API login is disabled for accounts with two-factor "
+"authentication. Use an Application Password."
+msgstr ""
+"API-login via wachtwoord is uitgeschakeld voor accounts met "
+"tweestapsverificatie. Gebruik een Application Password."
+
+#: src/Frontend/Controller.php:200
+msgid "Please choose a verification method."
+msgstr "Kies een verificatiemethode."
+
+#: src/Frontend/Controller.php:224
 msgid "The code is incorrect. Please try again."
 msgstr "De code klopt niet. Probeer het opnieuw."
 
+#: src/Frontend/Controller.php:243 src/Frontend/Controller.php:362
+msgid "A new code has been sent."
+msgstr "Er is een nieuwe code verstuurd."
+
+#: src/Frontend/Controller.php:246 src/Frontend/Controller.php:365
+msgid "You have requested too many codes. Please wait a bit and try again."
+msgstr "Je hebt te veel codes opgevraagd. Wacht even en probeer het opnieuw."
+
+#: src/Frontend/Controller.php:259
+msgid "The code is incorrect or expired. Please try again."
+msgstr "De code is onjuist of verlopen. Probeer het opnieuw."
+
+#: src/Frontend/Controller.php:352
 msgid "The code is incorrect. Please try again or use a backup code."
 msgstr "De code klopt niet. Probeer het opnieuw of gebruik een back-upcode."
 
+#: src/Frontend/Controller.php:385
+msgid ""
+"The code is incorrect or expired. Please try again or use a backup code."
+msgstr "De code is onjuist of verlopen. Probeer het opnieuw of gebruik een back-upcode."
+
+#: src/Frontend/Controller.php:533
 msgid "Template missing."
 msgstr "Template ontbreekt."
 
-msgid "Set up two-factor authentication"
-msgstr "Tweestapsverificatie instellen"
+#: src/Methods/Method.php:30
+msgid "Authenticator app"
+msgstr "Authenticator-app"
 
-msgid "Secure your account"
-msgstr "Beveilig je account"
+#. translators: %s: site name
+#: src/Security/EmailMailer.php:30
+msgid "[%s] Your verification code"
+msgstr "[%s] Je verificatiecode"
 
-msgid "Scan the QR code below with an authenticator app (such as Google Authenticator, 1Password, or Authy) and enter the six-digit code to complete setup."
-msgstr "Scan onderstaande QR-code met een authenticator-app (bijvoorbeeld Google Authenticator, 1Password of Authy) en voer de zescijferige code in om de instelling af te ronden."
+#. translators: %s: user login
+#: src/Security/EmailMailer.php:94 src/Security/EmailMailer.php:178
+msgid "Hi %s,"
+msgstr "Hallo %s,"
 
-msgid "Manual entry key for your app"
-msgstr "Handmatige sleutel voor in je app"
+#: src/Security/EmailMailer.php:97
+msgid "Use the code below to finish signing in."
+msgstr "Gebruik onderstaande code om in te loggen."
 
-msgid "Verification code"
-msgstr "Verificatiecode"
+#. translators: %d: minutes
+#: src/Security/EmailMailer.php:100 src/Security/EmailMailer.php:188
+msgid "This code expires in %d minute."
+msgid_plural "This code expires in %d minutes."
+msgstr[0] "Deze code verloopt over %d minuut."
+msgstr[1] "Deze code verloopt over %d minuten."
 
-msgid "Confirm and activate"
-msgstr "Bevestig en activeer"
+#: src/Security/EmailMailer.php:103 src/Security/EmailMailer.php:191
+msgid "If you did not try to sign in, you can ignore this email."
+msgstr "Heb je niet geprobeerd in te loggen? Dan kun je deze e-mail negeren."
 
-msgid "Signed in as"
-msgstr "Aangemeld als"
+#: src/Security/EmailMailer.php:104 src/Security/EmailMailer.php:192
+msgid "Never share this code with anyone — not even support staff."
+msgstr "Deel deze code nooit met iemand — ook niet met support."
 
-msgid "Enter verification code"
-msgstr "Verificatiecode invoeren"
+#: src/Security/EmailMailer.php:105
+msgid "Your one-time verification code is inside."
+msgstr "Je eenmalige verificatiecode staat hieronder."
 
-msgid "Open your authenticator app and enter the six-digit code. No access to your app? Use a backup code."
-msgstr "Open je authenticator-app en vul de zescijferige code in. Geen toegang tot je app? Gebruik een back-upcode."
+#: src/Security/EmailMailer.php:128
+msgid "Your verification code"
+msgstr "Je verificatiecode"
 
-msgid "Code"
-msgstr "Code"
+#: src/Security/EmailMailer.php:182
+msgid "Use the code below to finish signing in:"
+msgstr "Gebruik onderstaande code om in te loggen:"
 
-msgid "Sign in"
-msgstr "Inloggen"
-
+#: templates/backup-codes.php:15 templates/backup-codes.php:22
 msgid "Save your backup codes"
 msgstr "Bewaar je back-upcodes"
 
-msgid "Store these codes in a safe place (a password manager or printed paper). Each code works once, in case you lose your phone or have no access to your authenticator app."
-msgstr "Bewaar deze codes op een veilige plek (een wachtwoordmanager of geprint papier). Iedere code werkt één keer, bijvoorbeeld als je je telefoon kwijt bent of geen toegang hebt tot je authenticator-app."
+#: templates/backup-codes.php:24
+msgid ""
+"Store these codes in a safe place (a password manager or printed paper). "
+"Each code works once, in case you lose your phone or have no access to your "
+"authenticator app."
+msgstr ""
+"Bewaar deze codes op een veilige plek (een wachtwoordmanager of geprint "
+"papier). Iedere code werkt één keer, bijvoorbeeld als je je telefoon kwijt "
+"bent of geen toegang hebt tot je authenticator-app."
 
+#: templates/backup-codes.php:28
 msgid "Note:"
 msgstr "Let op:"
 
+#: templates/backup-codes.php:29
 msgid "These codes will never be shown again."
 msgstr "Deze codes worden hierna nooit meer getoond."
 
+#: templates/backup-codes.php:39
 msgid "I have saved my codes — continue"
 msgstr "Ik heb mijn codes opgeslagen — doorgaan"
 
+#: templates/challenge-email.php:26 templates/challenge.php:23
+msgid "Enter verification code"
+msgstr "Verificatiecode invoeren"
+
+#. translators: %s: masked email address
+#: templates/challenge-email.php:31
+msgid ""
+"We sent a six-digit code to %s. No access to your inbox? Use a backup code "
+"instead."
+msgstr "We hebben een zescijferige code naar %s gestuurd. Geen toegang tot je inbox? Gebruik dan een back-upcode."
+
+#: templates/challenge-email.php:47 templates/challenge.php:34
+msgid "Code"
+msgstr "Code"
+
+#: templates/challenge-email.php:50 templates/challenge.php:37
+msgid "Sign in"
+msgstr "Inloggen"
+
+#. translators: %d: seconds
+#: templates/challenge-email.php:55 templates/setup-email.php:57
+msgid "Send a new code (wait %ds)"
+msgstr "Stuur een nieuwe code (wacht %ds)"
+
+#: templates/challenge-email.php:56 templates/setup-email.php:58
+msgid "Send a new code"
+msgstr "Stuur een nieuwe code"
+
+#: templates/challenge-email.php:92 templates/challenge.php:40
+#: templates/setup-email.php:100 templates/setup-method-chooser.php:60
+#: templates/setup.php:45
+msgid "Signed in as"
+msgstr "Aangemeld als"
+
+#: templates/challenge.php:25
+msgid ""
+"Open your authenticator app and enter the six-digit code. No access to your "
+"app? Use a backup code."
+msgstr ""
+"Open je authenticator-app en vul de zescijferige code in. Geen toegang tot "
+"je app? Gebruik een back-upcode."
+
+#: templates/expired.php:13
 msgid "Session expired"
 msgstr "Sessie verlopen"
 
+#: templates/expired.php:20
 msgid "This link has expired"
 msgstr "Deze link is verlopen"
 
-msgid "Your verification link has expired or has already been used. Sign in again to continue."
-msgstr "Je verificatielink is verlopen of al gebruikt. Log opnieuw in om door te gaan."
+#: templates/expired.php:22
+msgid ""
+"Your verification link has expired or has already been used. Sign in again "
+"to continue."
+msgstr ""
+"Je verificatielink is verlopen of al gebruikt. Log opnieuw in om door te "
+"gaan."
 
+#: templates/expired.php:25
 msgid "Go to login page"
 msgstr "Naar inlogpagina"
+
+#: templates/setup-email.php:21 templates/setup-email.php:28
+msgid "Confirm your email"
+msgstr "Bevestig je e-mailadres"
+
+#. translators: %s: masked email address
+#: templates/setup-email.php:33
+msgid ""
+"We sent a six-digit code to %s. Enter it below to finish setting up email "
+"verification."
+msgstr "We hebben een zescijferige code naar %s gestuurd. Voer hem hieronder in om e-mailverificatie in te stellen."
+
+#: templates/setup-email.php:49 templates/setup.php:39
+msgid "Verification code"
+msgstr "Verificatiecode"
+
+#: templates/setup-email.php:52 templates/setup.php:42
+msgid "Confirm and activate"
+msgstr "Bevestig en activeer"
+
+#: templates/setup-email.php:96
+msgid "Use a different method"
+msgstr "Andere methode gebruiken"
+
+#: templates/setup-method-chooser.php:20 templates/setup-method-chooser.php:27
+msgid "Choose a verification method"
+msgstr "Kies een verificatiemethode"
+
+#: templates/setup-method-chooser.php:29
+msgid ""
+"How would you like to receive verification codes? You can change this later "
+"from your profile."
+msgstr "Hoe wil je verificatiecodes ontvangen? Je kunt dit later wijzigen via je profiel."
+
+#: templates/setup-method-chooser.php:46
+msgid "Use an authenticator app (Google Authenticator, 1Password, Authy, …)."
+msgstr "Gebruik een authenticator-app (Google Authenticator, 1Password, Authy, …)."
+
+#: templates/setup-method-chooser.php:48
+msgid "Receive a one-time code by email."
+msgstr "Ontvang een eenmalige code per e-mail."
+
+#: templates/setup-method-chooser.php:57
+msgid "Continue"
+msgstr "Doorgaan"
+
+#: templates/setup.php:18
+msgid "Set up two-factor authentication"
+msgstr "Tweestapsverificatie instellen"
+
+#: templates/setup.php:25
+msgid "Secure your account"
+msgstr "Beveilig je account"
+
+#: templates/setup.php:27
+msgid ""
+"Scan the QR code below with an authenticator app (such as Google "
+"Authenticator, 1Password, or Authy) and enter the six-digit code to complete "
+"setup."
+msgstr ""
+"Scan onderstaande QR-code met een authenticator-app (bijvoorbeeld Google "
+"Authenticator, 1Password of Authy) en voer de zescijferige code in om de "
+"instelling af te ronden."
+
+#: templates/setup.php:35
+msgid "Manual entry key for your app"
+msgstr "Handmatige sleutel voor in je app"
