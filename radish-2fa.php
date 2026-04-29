@@ -3,7 +3,7 @@
  * Plugin Name:       Radish 2FA
  * Plugin URI:        https://github.com/radishconcepts/radish-wp-2fa
  * Description:       Enforceable, frontend-first two-factor authentication (TOTP) for WordPress, with role-based hard enforcement.
- * Version:           0.2.0
+ * Version:           0.2.1
  * Requires at least: 6.2
  * Requires PHP:      8.1
  * Author:            Radish Concepts
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RADISH_2FA_VERSION', '0.2.0' );
+define( 'RADISH_2FA_VERSION', '0.2.1' );
 define( 'RADISH_2FA_FILE', __FILE__ );
 define( 'RADISH_2FA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'RADISH_2FA_URL', plugin_dir_url( __FILE__ ) );

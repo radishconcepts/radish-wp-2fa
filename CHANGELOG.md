@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-04-29
+
+### Changed
+- Self-service method switch on the profile screen is now a radio-button row inside the form-table, saved with the regular **Update profile** button. The change is queued via a new `_radish_2fa_pending_method` user-meta and only applied at the user's next sign-in (`wp_login` priority 5 clears the old enrollment so `LoginInterceptor` routes them straight to `/2fa/setup`). The current session keeps using the active method.
+- An info notice on the profile screen surfaces a queued method change so the user knows what to expect at next sign-in.
+
+### Fixed
+- The old **Change method** / **Reset 2FA** buttons silently no-op'd: they were rendered as `<form>` elements nested inside WordPress's profile form (which HTML strips), so clicks fell through to the outer profile form. The change-method flow is now part of the profile form itself; **Reset 2FA** is a nonce-protected admin-post link.
+- Dutch (`nl_NL`) translations added for the new self-service strings; `radish-2fa.pot` regenerated and `.mo` recompiled.
+
 ## [0.2.0] - 2026-04-29
 
 ### Added
@@ -50,7 +60,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `radish_2fa_totp_issuer` filter for customizing the TOTP app issuer label.
 - Dutch translation; `.pot` file shipped for additional locales.
 
-[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.0...v0.1.1

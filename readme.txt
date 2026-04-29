@@ -3,7 +3,7 @@ Contributors: radishconcepts
 Tags: two-factor-authentication, 2fa, totp, security, multisite
 Requires at least: 6.2
 Tested up to: 6.7
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -104,6 +104,11 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 
 == Changelog ==
 
+= 0.2.1 =
+* Fix: Self-service "Change method" / "Reset 2FA" buttons on the profile screen no longer silently no-op. They were rendered as `<form>` elements nested inside WordPress's profile form (which HTML strips), so clicks fell through to the outer profile form.
+* Change: Method switching is now a radio-button row inside the profile form-table, saved with the regular Update profile button. The change is queued via a `_radish_2fa_pending_method` user-meta and only applied at the user's next sign-in, so the current session keeps using the active method.
+* i18n: Dutch translations added for the new self-service strings; `radish-2fa.pot` regenerated.
+
 = 0.2.0 =
 * Feature: Email-based 2FA as an opt-in alternative to TOTP. Admins enable it under Settings → Two-Factor → Authentication methods; users with multiple methods available pick one on the new setup chooser.
 * Feature: 6-digit numeric email OTP with 10-minute TTL, bcrypt-hashed at rest. HTML + plain-text multipart message; subject and body filterable via `radish_2fa_email_subject`, `radish_2fa_email_html`, and `radish_2fa_email_alt_body`.
@@ -136,6 +141,9 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 * Feature: Dutch translation included; `.pot` file shipped for additional locales.
 
 == Upgrade Notice ==
+
+= 0.2.1 =
+Fixes the self-service Change-method and Reset-2FA buttons on the user profile screen, which silently no-op'd due to nested-form HTML. Method switching is now a radio-button row applied at the user's next sign-in. Recommended for all installs running 0.2.0.
 
 = 0.2.0 =
 Adds email-based 2FA as an opt-in alternative to TOTP, plus a self-service profile section. Existing TOTP users are unaffected; admins must explicitly enable email under Settings → Two-Factor before users can choose it.

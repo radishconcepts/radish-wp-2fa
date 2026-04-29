@@ -12,11 +12,12 @@ use RadishConcepts\TwoFactor\Security\Crypto;
  */
 final class UserMeta {
 
-	public const META_SECRET       = '_radish_2fa_secret';
-	public const META_ENROLLED_AT  = '_radish_2fa_enrolled_at';
-	public const META_BACKUP_CODES = '_radish_2fa_backup_codes';
-	public const META_LAST_USED_AT = '_radish_2fa_last_used_at';
-	public const META_METHOD       = '_radish_2fa_method';
+	public const META_SECRET         = '_radish_2fa_secret';
+	public const META_ENROLLED_AT    = '_radish_2fa_enrolled_at';
+	public const META_BACKUP_CODES   = '_radish_2fa_backup_codes';
+	public const META_LAST_USED_AT   = '_radish_2fa_last_used_at';
+	public const META_METHOD         = '_radish_2fa_method';
+	public const META_PENDING_METHOD = '_radish_2fa_pending_method';
 
 	private static ?self $instance = null;
 
@@ -87,6 +88,7 @@ final class UserMeta {
 		delete_user_meta( $user_id, self::META_BACKUP_CODES );
 		delete_user_meta( $user_id, self::META_LAST_USED_AT );
 		delete_user_meta( $user_id, self::META_METHOD );
+		delete_user_meta( $user_id, self::META_PENDING_METHOD );
 	}
 
 	/**

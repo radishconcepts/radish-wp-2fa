@@ -3,9 +3,9 @@
 # This file is distributed under the GPL-2.0-or-later license.
 msgid ""
 msgstr ""
-"Project-Id-Version: Radish 2FA 0.2.0\n"
+"Project-Id-Version: Radish 2FA 0.2.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/radish-2fa\n"
-"POT-Creation-Date: 2026-04-29T20:28:06+00:00\n"
+"POT-Creation-Date: 2026-04-29T21:01:54+00:00\n"
 "PO-Revision-Date: 2026-04-28 00:00+0000\n"
 "Last-Translator: Radish Concepts\n"
 "Language-Team: Nederlands\n"
@@ -33,7 +33,9 @@ msgstr "https://github.com/radishconcepts/radish-wp-2fa"
 msgid ""
 "Enforceable, frontend-first two-factor authentication (TOTP) for WordPress, "
 "with role-based hard enforcement."
-msgstr "Afdwingbare, frontend-georiënteerde tweestapsverificatie (TOTP) voor WordPress, met harde rol-gebaseerde verplichting."
+msgstr ""
+"Afdwingbare, frontend-georiënteerde tweestapsverificatie (TOTP) voor "
+"WordPress, met harde rol-gebaseerde verplichting."
 
 #. Author of the plugin
 #: radish-2fa.php
@@ -45,7 +47,7 @@ msgstr "Radish Concepts"
 msgid "https://www.radishconcepts.com"
 msgstr "https://www.radishconcepts.com"
 
-#: src/Admin/Reset.php:47 src/Admin/SelfManage.php:59
+#: src/Admin/Reset.php:47 src/Admin/SelfManage.php:61
 #: templates/challenge-email.php:19 templates/challenge.php:16
 msgid "Two-factor authentication"
 msgstr "Tweestapsverificatie"
@@ -58,7 +60,7 @@ msgstr ""
 "Tweestapsverificatie is gereset. De gebruiker moet bij de volgende login "
 "opnieuw instellen."
 
-#: src/Admin/Reset.php:57 src/Admin/SelfManage.php:70
+#: src/Admin/Reset.php:57 src/Admin/SelfManage.php:86
 msgid "Status"
 msgstr "Status"
 
@@ -120,57 +122,85 @@ msgstr "Geen toegang."
 msgid "Invalid user."
 msgstr "Ongeldige gebruiker."
 
-#: src/Admin/SelfManage.php:63
+#: src/Admin/SelfManage.php:65
 msgid ""
 "Two-factor authentication has been reset. You will be asked to set it up "
 "again on your next sign-in."
-msgstr "Tweestapsverificatie is opnieuw ingesteld. Bij je volgende inlog vragen we je om hem opnieuw in te stellen."
+msgstr ""
+"Tweestapsverificatie is opnieuw ingesteld. Bij je volgende inlog vragen we "
+"je om hem opnieuw in te stellen."
 
-#: src/Admin/SelfManage.php:73
+#. translators: %s: human-readable label of the queued 2FA method
+#: src/Admin/SelfManage.php:75
+msgid ""
+"A method change to %s is queued. You will be asked to set it up at your next "
+"sign-in; your current session keeps working with the active method."
+msgstr ""
+"Een methodewijziging naar %s staat klaar. Bij je volgende inlog wordt je "
+"gevraagd om deze in te stellen; je huidige sessie blijft werken met de "
+"actieve methode."
+
+#: src/Admin/SelfManage.php:89
 msgid "Enabled"
 msgstr "Ingeschakeld"
 
-#: src/Admin/SelfManage.php:75
+#: src/Admin/SelfManage.php:91
 msgid ""
 "Not enabled — you will be asked to set it up at next sign-in if your role "
 "requires it."
-msgstr "Niet ingeschakeld — als je rol dit vereist, vragen we je om hem in te stellen bij je volgende inlog."
+msgstr ""
+"Niet ingeschakeld — als je rol dit vereist, vragen we je om hem in te "
+"stellen bij je volgende inlog."
 
-#: src/Admin/SelfManage.php:82
+#: src/Admin/SelfManage.php:98
 msgid "Method"
 msgstr "Methode"
 
-#: src/Admin/SelfManage.php:89
+#: src/Admin/SelfManage.php:102
+msgid "Verification method"
+msgstr "Verificatiemethode"
+
+#: src/Admin/SelfManage.php:109
+msgid "(active)"
+msgstr "(actief)"
+
+#: src/Admin/SelfManage.php:114
+msgid ""
+"Pick a different method and save your profile to queue the change. The new "
+"method only takes effect on your next sign-in."
+msgstr ""
+"Kies een andere methode en sla je profiel op om de wijziging klaar te "
+"zetten. De nieuwe methode wordt pas actief bij je volgende inlog."
+
+#: src/Admin/SelfManage.php:126
 msgid "Enrolled at"
 msgstr "Aangemeld op"
 
-#: src/Admin/SelfManage.php:96
+#: src/Admin/SelfManage.php:133
 msgid "Last used"
 msgstr "Laatst gebruikt"
 
-#: src/Admin/SelfManage.php:103
+#: src/Admin/SelfManage.php:140
 msgid "Backup codes"
 msgstr "Back-upcodes"
 
-#: src/Admin/SelfManage.php:104
+#: src/Admin/SelfManage.php:141
 msgid "remaining"
 msgstr "resterend"
 
-#: src/Admin/SelfManage.php:114
-msgid "Change method"
-msgstr "Methode wijzigen"
-
-#: src/Admin/SelfManage.php:119
+#: src/Admin/SelfManage.php:149
 msgid ""
 "This will turn off two-factor authentication for your account. You can set "
 "it up again afterwards. Continue?"
-msgstr "Hiermee schakel je tweestapsverificatie voor je account uit. Je kunt hem daarna opnieuw instellen. Doorgaan?"
+msgstr ""
+"Hiermee schakel je tweestapsverificatie voor je account uit. Je kunt hem "
+"daarna opnieuw instellen. Doorgaan?"
 
-#: src/Admin/SelfManage.php:122
+#: src/Admin/SelfManage.php:150
 msgid "Reset 2FA"
 msgstr "2FA opnieuw instellen"
 
-#: src/Admin/SelfManage.php:133 src/Admin/SelfManage.php:158
+#: src/Admin/SelfManage.php:206
 msgid "You must be signed in."
 msgstr "Je moet ingelogd zijn."
 
@@ -186,7 +216,9 @@ msgstr "Verificatiemethoden"
 msgid ""
 "Choose which two-factor methods users can pick from. Authenticator app is "
 "always available; email is opt-in."
-msgstr "Kies welke tweestapsverificatiemethoden gebruikers mogen kiezen. Authenticator-app is altijd beschikbaar; e-mail is optioneel."
+msgstr ""
+"Kies welke tweestapsverificatiemethoden gebruikers mogen kiezen. "
+"Authenticator-app is altijd beschikbaar; e-mail is optioneel."
 
 #: src/Admin/Settings.php:90 src/Admin/Settings.php:93
 msgid "Methods"
@@ -206,7 +238,9 @@ msgstr "E-mail"
 
 #: src/Admin/Settings.php:104
 msgid "Send a one-time code to the user’s WordPress profile email."
-msgstr "Stuur een eenmalige code naar het e-mailadres in het WordPress-profiel van de gebruiker."
+msgstr ""
+"Stuur een eenmalige code naar het e-mailadres in het WordPress-profiel van "
+"de gebruiker."
 
 #: src/Admin/Settings.php:112
 msgid "Enforced roles"
@@ -271,7 +305,9 @@ msgstr "De code klopt niet. Probeer het opnieuw of gebruik een back-upcode."
 #: src/Frontend/Controller.php:385
 msgid ""
 "The code is incorrect or expired. Please try again or use a backup code."
-msgstr "De code is onjuist of verlopen. Probeer het opnieuw of gebruik een back-upcode."
+msgstr ""
+"De code is onjuist of verlopen. Probeer het opnieuw of gebruik een back-"
+"upcode."
 
 #: src/Frontend/Controller.php:533
 msgid "Template missing."
@@ -357,7 +393,9 @@ msgstr "Verificatiecode invoeren"
 msgid ""
 "We sent a six-digit code to %s. No access to your inbox? Use a backup code "
 "instead."
-msgstr "We hebben een zescijferige code naar %s gestuurd. Geen toegang tot je inbox? Gebruik dan een back-upcode."
+msgstr ""
+"We hebben een zescijferige code naar %s gestuurd. Geen toegang tot je inbox? "
+"Gebruik dan een back-upcode."
 
 #: templates/challenge-email.php:47 templates/challenge.php:34
 msgid "Code"
@@ -419,7 +457,9 @@ msgstr "Bevestig je e-mailadres"
 msgid ""
 "We sent a six-digit code to %s. Enter it below to finish setting up email "
 "verification."
-msgstr "We hebben een zescijferige code naar %s gestuurd. Voer hem hieronder in om e-mailverificatie in te stellen."
+msgstr ""
+"We hebben een zescijferige code naar %s gestuurd. Voer hem hieronder in om e-"
+"mailverificatie in te stellen."
 
 #: templates/setup-email.php:49 templates/setup.php:39
 msgid "Verification code"
@@ -441,11 +481,14 @@ msgstr "Kies een verificatiemethode"
 msgid ""
 "How would you like to receive verification codes? You can change this later "
 "from your profile."
-msgstr "Hoe wil je verificatiecodes ontvangen? Je kunt dit later wijzigen via je profiel."
+msgstr ""
+"Hoe wil je verificatiecodes ontvangen? Je kunt dit later wijzigen via je "
+"profiel."
 
 #: templates/setup-method-chooser.php:46
 msgid "Use an authenticator app (Google Authenticator, 1Password, Authy, …)."
-msgstr "Gebruik een authenticator-app (Google Authenticator, 1Password, Authy, …)."
+msgstr ""
+"Gebruik een authenticator-app (Google Authenticator, 1Password, Authy, …)."
 
 #: templates/setup-method-chooser.php:48
 msgid "Receive a one-time code by email."
@@ -476,3 +519,6 @@ msgstr ""
 #: templates/setup.php:35
 msgid "Manual entry key for your app"
 msgstr "Handmatige sleutel voor in je app"
+
+#~ msgid "Change method"
+#~ msgstr "Methode wijzigen"
