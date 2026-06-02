@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-06-02
+
+### Fixed
+- Front-end logins (e.g. the WooCommerce **My Account** form) showed a blank white page after a successful 2FA verification. The auth cookie was set, but `LoginInterceptor::resolve_redirect_to()` only read `redirect_to` — which WooCommerce omits in favour of a `redirect` field — and passed the empty string to `wp_validate_redirect()`. WordPress only swaps in the fallback for a *disallowed host*, so the empty value propagated unchanged and `complete_login()` called `wp_safe_redirect( '' )`, which emits no `Location` header. wp-login.php logins were unaffected because they always send a populated `redirect_to`.
+- Redirect resolution is now centralised in the new `Auth\RedirectTarget` helper: it honours `redirect_to` then `redirect`, defaults admin logins to wp-admin and front-end logins to the site home, and always returns a non-empty, host-validated target. `complete_login()` runs every redirect through `RedirectTarget::ensure()` as a final safety net.
+
+### Tests
+- `RedirectTargetTest` covers the empty-target regression, the WooCommerce `redirect` fallback, host validation, and the admin/front-end defaults.
+
 ## [0.2.1] - 2026-04-29
 
 ### Changed

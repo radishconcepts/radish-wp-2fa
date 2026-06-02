@@ -3,7 +3,7 @@ Contributors: radishconcepts
 Tags: two-factor-authentication, 2fa, totp, security, multisite
 Requires at least: 6.2
 Tested up to: 6.7
-Stable tag: 0.2.1
+Stable tag: 0.2.2
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -103,6 +103,10 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 <!-- TODO: Add screenshots. Recommended: (1) the role-enforcement settings page, (2) the frontend /2fa/setup page with QR code, (3) the /2fa/challenge page, (4) the backup codes screen, (5) the user-edit reset block. Name files screenshot-1.png, screenshot-2.png, etc. in the /assets/ directory. -->
 
 == Changelog ==
+
+= 0.2.2 =
+* Fix: Signing in through a front-end login form (e.g. the WooCommerce **My Account** page) showed a blank white page after entering the verification code. The user was actually logged in, but the post-login redirect was empty so no page loaded. Front-end logins now return to the site's home page; admin (wp-login.php) logins continue to honour their `redirect_to`.
+* Fix: The post-login redirect now also honours the `redirect` field used by WooCommerce and other front-end forms, in addition to `redirect_to`, and can never resolve to an empty target.
 
 = 0.2.1 =
 * Fix: Self-service "Change method" / "Reset 2FA" buttons on the profile screen no longer silently no-op. They were rendered as `<form>` elements nested inside WordPress's profile form (which HTML strips), so clicks fell through to the outer profile form.
