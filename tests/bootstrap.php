@@ -152,6 +152,58 @@ if ( ! function_exists( 'wp_parse_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'admin_url' ) ) {
+	function admin_url( string $path = '' ): string {
+		return 'https://example.test/wp-admin/' . ltrim( $path, '/' );
+	}
+}
+
+if ( ! function_exists( 'wp_unslash' ) ) {
+	function wp_unslash( $value ) {
+		return is_string( $value ) ? stripslashes( $value ) : $value;
+	}
+}
+
+if ( ! function_exists( 'wp_validate_redirect' ) ) {
+	/**
+	 * Faithful reproduction of WordPress core's wp_validate_redirect() for the
+	 * behaviours RedirectTarget relies on — crucially the quirk that an empty
+	 * (host-less) location is returned unchanged rather than replaced by the
+	 * fallback. Allowed host is derived from home_url().
+	 */
+	function wp_validate_redirect( string $location, string $default = '' ): string {
+		$location = trim( $location, " \t\n\r\0\x08\x0B" );
+
+		if ( str_starts_with( $location, '//' ) ) {
+			$location = 'http:' . $location;
+		}
+
+		$cut  = strpos( $location, '?' );
+		$test = false !== $cut ? substr( $location, 0, $cut ) : $location;
+		$lp   = parse_url( $test );
+
+		if ( false === $lp ) {
+			return $default;
+		}
+
+		if ( isset( $lp['scheme'] ) && ! isset( $lp['host'] ) ) {
+			return $default;
+		}
+
+		// Host-less (relative or empty) locations are returned as-is by core.
+		if ( ! isset( $lp['host'] ) ) {
+			return $location;
+		}
+
+		$home_host = (string) parse_url( home_url(), PHP_URL_HOST );
+		if ( strtolower( $lp['host'] ) !== strtolower( $home_host ) ) {
+			return $default;
+		}
+
+		return $location;
+	}
+}
+
 if ( ! function_exists( 'add_query_arg' ) ) {
 	function add_query_arg( $key, $value = null, $url = '' ): string {
 		if ( is_array( $key ) ) {

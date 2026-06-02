@@ -101,9 +101,9 @@ final class LoginInterceptor {
 	}
 
 	private function resolve_redirect_to(): string {
-		$requested = isset( $_REQUEST['redirect_to'] ) ? (string) wp_unslash( $_REQUEST['redirect_to'] ) : '';
+		$is_wp_login = 'wp-login.php' === ( $GLOBALS['pagenow'] ?? '' );
 
-		return wp_validate_redirect( $requested, admin_url() );
+		return RedirectTarget::resolve( $_REQUEST, $is_wp_login );
 	}
 
 	private function __construct() {}

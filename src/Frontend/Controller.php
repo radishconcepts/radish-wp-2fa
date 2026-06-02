@@ -7,6 +7,7 @@ namespace RadishConcepts\TwoFactor\Frontend;
 use RadishConcepts\TwoFactor\Activation;
 use RadishConcepts\TwoFactor\Admin\Settings;
 use RadishConcepts\TwoFactor\Auth\Nonce;
+use RadishConcepts\TwoFactor\Auth\RedirectTarget;
 use RadishConcepts\TwoFactor\Methods\Method;
 use RadishConcepts\TwoFactor\Routes;
 use RadishConcepts\TwoFactor\Security\BackupCodes;
@@ -514,7 +515,9 @@ final class Controller {
 
 		wp_set_auth_cookie( $user->ID, ! empty( $payload['remember'] ), is_ssl() );
 
-		$redirect_to = isset( $payload['redirect_to'] ) ? wp_validate_redirect( (string) $payload['redirect_to'], admin_url() ) : admin_url();
+		// Never emit an empty Location: wp_safe_redirect( '' ) sends no header
+		// and strands the (now logged-in) user on a blank page. See RedirectTarget.
+		$redirect_to = RedirectTarget::ensure( (string) ( $payload['redirect_to'] ?? '' ) );
 
 		wp_safe_redirect( $redirect_to );
 		exit;
