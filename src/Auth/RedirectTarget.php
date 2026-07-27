@@ -48,6 +48,32 @@ final class RedirectTarget {
 	}
 
 	/**
+	 * Decide where a request whose 2FA token can no longer be resolved should go.
+	 *
+	 * An unresolvable token is not automatically a failed sign-in. It is usually a
+	 * repeat of a request that already succeeded (double-clicked submit, browser
+	 * re-sending the POST on back or reload, restored tab), or a stale link opened
+	 * by someone whose session is alive. Rendering "session expired" in those cases
+	 * reports a failure that never happened.
+	 *
+	 * @param array<string,mixed>|null $receipt      Receipt of a completed flow for this token, if any.
+	 * @param bool                     $is_logged_in Whether the request carries a valid session.
+	 *
+	 * @return string|null Redirect target, or null when the visitor really must sign in again.
+	 */
+	public static function after_stale_token( ?array $receipt, bool $is_logged_in ): ?string {
+		if ( null !== $receipt ) {
+			return self::ensure( (string) ( $receipt['redirect_to'] ?? '' ) );
+		}
+
+		if ( $is_logged_in ) {
+			return self::ensure( '' );
+		}
+
+		return null;
+	}
+
+	/**
 	 * Guarantee a non-empty, validated redirect immediately before emitting it.
 	 * Defends every redirect against wp_validate_redirect()'s empty pass-through.
 	 */

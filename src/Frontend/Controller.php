@@ -69,7 +69,7 @@ final class Controller {
 		$payload = Nonce::instance()->peek( $token );
 
 		if ( null === $payload ) {
-			$this->render_expired();
+			$this->handle_stale_token( $token );
 			exit;
 		}
 
@@ -78,6 +78,10 @@ final class Controller {
 			$this->render_expired();
 			exit;
 		}
+
+		// The visitor is demonstrably still working through the flow: restart the
+		// idle window so a slow (but real) attempt doesn't expire under them.
+		Nonce::instance()->touch( $token );
 
 		$is_post = 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? 'GET' );
 
@@ -507,7 +511,14 @@ final class Controller {
 	}
 
 	private function complete_login( string $token, array $payload, WP_User $user ): void {
-		Nonce::instance()->consume( $token );
+		// Never emit an empty Location: wp_safe_redirect( '' ) sends no header
+		// and strands the (now logged-in) user on a blank page. See RedirectTarget.
+		$redirect_to = RedirectTarget::ensure( (string) ( $payload['redirect_to'] ?? '' ) );
+
+		// Consume the nonce, but leave a receipt so a repeat of this very request
+		// resolves to the destination instead of reporting an expired session.
+		Nonce::instance()->complete( $token, $user->ID, $redirect_to );
+
 		UserMeta::instance()->mark_used( $user->ID );
 		// Successful verification proves it's really this user — drop the email
 		// rate-limit so the next sign-in can immediately request a fresh code.
@@ -515,12 +526,29 @@ final class Controller {
 
 		wp_set_auth_cookie( $user->ID, ! empty( $payload['remember'] ), is_ssl() );
 
-		// Never emit an empty Location: wp_safe_redirect( '' ) sends no header
-		// and strands the (now logged-in) user on a blank page. See RedirectTarget.
-		$redirect_to = RedirectTarget::ensure( (string) ( $payload['redirect_to'] ?? '' ) );
-
 		wp_safe_redirect( $redirect_to );
 		exit;
+	}
+
+	/**
+	 * A token that no longer resolves is most often a *repeat* of a request that
+	 * already succeeded, so only fall back to the expired screen when there is
+	 * genuinely nothing to resume. Redirecting also answers the repeated POST with
+	 * a GET, which stops the browser from resubmitting it again.
+	 */
+	private function handle_stale_token( string $token ): void {
+		$target = RedirectTarget::after_stale_token(
+			Nonce::instance()->peek_completed( $token ),
+			is_user_logged_in()
+		);
+
+		if ( null === $target ) {
+			$this->render_expired();
+
+			return;
+		}
+
+		wp_safe_redirect( $target );
 	}
 
 	private function render_expired(): void {

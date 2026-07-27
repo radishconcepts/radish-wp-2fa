@@ -89,4 +89,39 @@ final class RedirectTargetTest extends TestCase {
 	public function test_ensure_rejects_offsite_target(): void {
 		$this->assertSame( 'https://example.test/', RedirectTarget::ensure( 'https://evil.example.com/' ) );
 	}
+
+	public function test_stale_token_with_receipt_follows_the_original_target(): void {
+		$this->assertSame(
+			'https://example.test/wp-admin/',
+			RedirectTarget::after_stale_token(
+				[ 'user_id' => 3, 'redirect_to' => 'https://example.test/wp-admin/' ],
+				false
+			)
+		);
+	}
+
+	public function test_stale_token_with_receipt_falls_back_to_home(): void {
+		$this->assertSame(
+			'https://example.test/',
+			RedirectTarget::after_stale_token( [ 'user_id' => 3, 'redirect_to' => '' ], false )
+		);
+	}
+
+	public function test_stale_token_receipt_target_is_validated(): void {
+		$this->assertSame(
+			'https://example.test/',
+			RedirectTarget::after_stale_token(
+				[ 'user_id' => 3, 'redirect_to' => 'https://evil.example.com/' ],
+				false
+			)
+		);
+	}
+
+	public function test_stale_token_sends_a_logged_in_visitor_onward(): void {
+		$this->assertSame( 'https://example.test/', RedirectTarget::after_stale_token( null, true ) );
+	}
+
+	public function test_stale_token_without_receipt_or_session_has_no_target(): void {
+		$this->assertNull( RedirectTarget::after_stale_token( null, false ) );
+	}
 }

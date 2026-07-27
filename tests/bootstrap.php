@@ -34,8 +34,9 @@ if ( ! defined( 'RADISH_2FA_VERSION' ) ) {
  *
  * @var array<string,mixed>
  */
-global $rt2fa_test_transients, $rt2fa_test_options, $rt2fa_test_user_meta, $rt2fa_test_super_admin, $rt2fa_test_actions, $rt2fa_test_mails;
-$rt2fa_test_transients   = [];
+global $rt2fa_test_transients, $rt2fa_test_transient_ttls, $rt2fa_test_options, $rt2fa_test_user_meta, $rt2fa_test_super_admin, $rt2fa_test_actions, $rt2fa_test_mails;
+$rt2fa_test_transients     = [];
+$rt2fa_test_transient_ttls = [];
 $rt2fa_test_options      = [];
 $rt2fa_test_user_meta    = [];
 $rt2fa_test_super_admin  = false;
@@ -57,8 +58,9 @@ if ( ! function_exists( 'add_action' ) ) {
 
 if ( ! function_exists( 'set_site_transient' ) ) {
 	function set_site_transient( string $key, $value, int $ttl = 0 ): bool {
-		global $rt2fa_test_transients;
-		$rt2fa_test_transients[ $key ] = $value;
+		global $rt2fa_test_transients, $rt2fa_test_transient_ttls;
+		$rt2fa_test_transients[ $key ]     = $value;
+		$rt2fa_test_transient_ttls[ $key ] = $ttl;
 
 		return true;
 	}
