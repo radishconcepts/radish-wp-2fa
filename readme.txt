@@ -3,7 +3,7 @@ Contributors: radishconcepts
 Tags: two-factor-authentication, 2fa, totp, security, multisite
 Requires at least: 6.2
 Tested up to: 6.7
-Stable tag: 0.2.2
+Stable tag: 0.2.3
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -103,6 +103,11 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 <!-- TODO: Add screenshots. Recommended: (1) the role-enforcement settings page, (2) the frontend /2fa/setup page with QR code, (3) the /2fa/challenge page, (4) the backup codes screen, (5) the user-edit reset block. Name files screenshot-1.png, screenshot-2.png, etc. in the /assets/ directory. -->
 
 == Changelog ==
+
+= 0.2.3 =
+* Fix: "This link has expired" was shown after a *successful* verification, making the sign-in look failed while the user was in fact logged in. Any repeat of the request that finished the flow (a double-clicked Sign in button, the browser re-sending the form after back or reload, a restored tab) no longer reports an expired session but continues to the intended page.
+* Fix: Opening a stale 2FA link while already signed in redirects onward instead of showing the expired screen.
+* Fix: The five-minute verification window now counts idle time and restarts on every 2FA page view (capped at 30 minutes total), so waiting for an e-mail code or fetching your phone no longer expires the sign-in halfway through.
 
 = 0.2.2 =
 * Fix: Signing in through a front-end login form (e.g. the WooCommerce **My Account** page) showed a blank white page after entering the verification code. The user was actually logged in, but the post-login redirect was empty so no page loaded. Front-end logins now return to the site's home page; admin (wp-login.php) logins continue to honour their `redirect_to`.

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-07-27
+
+### Fixed
+- "This link has expired" was shown after a *successful* 2FA verification, making the sign-in look failed while the user was in fact logged in (visiting wp-admin manually proved it). `complete_login()` deleted the nonce, so any repeat of the request that finished the flow — a double-clicked **Sign in** button, the browser re-sending the POST after back/reload, a restored tab, a retried slow request — found no nonce and was indistinguishable from an expired link. `Nonce::complete()` now leaves a short-lived receipt (15 min, `user_id` + validated `redirect_to`, no secrets) so the repeat resolves to the destination instead. Answering the repeated POST with a redirect also stops the browser from resubmitting it.
+- A stale 2FA link opened by a visitor whose session is already valid now redirects instead of reporting an expired session. Users who require 2FA but aren't enrolled land back on `/2fa/setup` with a fresh nonce via `Auth\Enforcement`.
+- The 5-minute nonce TTL was absolute from the moment the password was accepted, so waiting for a mail to arrive or fetching a phone could expire the flow mid-way. It is now a 5-minute *idle* window, restarted on every 2FA page view (`Nonce::touch()`), capped by a hard 30-minute ceiling.
+
+### Tests
+- `NonceTest` covers the completion receipt (nonce consumed, token still recognisable, receipt carries no secrets, key stays hashed) and the idle window (restart, clamp to ceiling, drop past ceiling, no-op on unknown tokens).
+- `RedirectTargetTest` covers `after_stale_token()`: receipt target honoured and host-validated, logged-in visitors sent onward, expired screen only when there is nothing to resume.
+
 ## [0.2.2] - 2026-06-02
 
 ### Fixed
@@ -69,7 +80,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `radish_2fa_totp_issuer` filter for customizing the TOTP app issuer label.
 - Dutch translation; `.pot` file shipped for additional locales.
 
-[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.1.1...v0.1.2
