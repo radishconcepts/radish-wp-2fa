@@ -34,7 +34,7 @@ In your site's `composer.json`:
     ],
     "extra": {
         "installer-paths": {
-            "wp-content/plugins/{$name}/": [ "type:wordpress-plugin" ]
+            "app/www/wp-content/plugins/{$name}/": [ "type:wordpress-plugin" ]
         }
     }
 }
