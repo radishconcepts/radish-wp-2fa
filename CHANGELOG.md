@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-10-09
+
 ### Security
 - On multisite, `Roles::user_requires_2fa()` only looked at the user's roles on the site where they logged in, while the auth cookie is valid on every site of the network. A user with an enforced role on one site could skip 2FA by logging in on another site (or the root site) where they had no enforced role, then open the admin of the first site. The check now collects the user's roles on every site they belong to, including archived, spammed and deleted sites, so a role anywhere on the network triggers 2FA. Single-site installs are unaffected.
 
@@ -86,7 +88,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `radish_2fa_totp_issuer` filter for customizing the TOTP app issuer label.
 - Dutch translation; `.pot` file shipped for additional locales.
 
-[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.3...HEAD
+[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.4...HEAD
+[0.2.4]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.0...v0.2.1

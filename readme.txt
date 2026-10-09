@@ -3,7 +3,7 @@ Contributors: radishconcepts
 Tags: two-factor-authentication, 2fa, totp, security, multisite
 Requires at least: 6.2
 Tested up to: 6.7
-Stable tag: 0.2.3
+Stable tag: 0.2.4
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -104,6 +104,9 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 
 == Changelog ==
 
+= 0.2.4 =
+* Security: On multisite, the 2FA requirement only looked at the user's roles on the site where they signed in. Because the login is valid on every site of the network, a user with an enforced role on one site could skip 2FA by signing in on another site. A role on any site of the network now triggers 2FA. Single-site installs are unaffected.
+
 = 0.2.3 =
 * Fix: "This link has expired" was shown after a *successful* verification, making the sign-in look failed while the user was in fact logged in. Any repeat of the request that finished the flow (a double-clicked Sign in button, the browser re-sending the form after back or reload, a restored tab) no longer reports an expired session but continues to the intended page.
 * Fix: Opening a stale 2FA link while already signed in redirects onward instead of showing the expired screen.
@@ -150,6 +153,9 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 * Feature: Dutch translation included; `.pot` file shipped for additional locales.
 
 == Upgrade Notice ==
+
+= 0.2.4 =
+Security fix for multisite: users with an enforced role on any site of the network now always get the 2FA step, wherever they sign in. Strongly recommended for all multisite installs.
 
 = 0.2.1 =
 Fixes the self-service Change-method and Reset-2FA buttons on the user profile screen, which silently no-op'd due to nested-form HTML. Method switching is now a radio-button row applied at the user's next sign-in. Recommended for all installs running 0.2.0.
