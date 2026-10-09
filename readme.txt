@@ -3,7 +3,7 @@ Contributors: radishconcepts
 Tags: two-factor-authentication, 2fa, totp, security, multisite
 Requires at least: 6.2
 Tested up to: 6.7
-Stable tag: 0.2.4
+Stable tag: 0.3.0
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -104,6 +104,14 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 
 == Changelog ==
 
+= 0.3.0 =
+* Security: Wrong verification codes are limited to 5 per sign-in attempt and 10 per user in 15 minutes. After that a "Too many incorrect codes" page is shown and the user has to wait before signing in again. A password reset lifts the limit.
+* Security: Password logins through the REST API or XML-RPC can no longer get past the block with a fake authorization header. Application passwords keep working.
+* Security: A session now records that it passed two-factor authentication. A session that did not (for example one created by another plugin) is sent back to the verification step, also in wp-admin, and cannot use AJAX or the REST API.
+* Change: Users who still need to set up two-factor authentication are also sent to setup from wp-admin.
+* Change: Changing your own password no longer asks for your code again.
+* Note: After upgrading, users who require two-factor authentication enter their code once more on their next page view.
+
 = 0.2.4 =
 * Security: On multisite, the 2FA requirement only looked at the user's roles on the site where they signed in. Because the login is valid on every site of the network, a user with an enforced role on one site could skip 2FA by signing in on another site. A role on any site of the network now triggers 2FA. Single-site installs are unaffected.
 
@@ -153,6 +161,9 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 * Feature: Dutch translation included; `.pot` file shipped for additional locales.
 
 == Upgrade Notice ==
+
+= 0.3.0 =
+Security hardening: limits wrong codes, closes an API login bypass and checks every session for a passed 2FA step. Users who require 2FA enter their code once more after the upgrade. Recommended for all installs.
 
 = 0.2.4 =
 Security fix for multisite: users with an enforced role on any site of the network now always get the 2FA step, wherever they sign in. Strongly recommended for all multisite installs.

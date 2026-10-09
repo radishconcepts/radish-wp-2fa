@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-09
+
+### Security
+- Wrong verification codes are now limited. A 2FA token allows 5 wrong codes, a user 10 in a rolling 15 minutes (new `Security\AttemptLimit`, site transients `r2fa_fail_{user_id}` and `r2fa_tfail_{sha256(token)}`). When either limit is hit, the token is consumed and a new **Too many incorrect codes** page is shown (HTTP 429, theme-overridable as `radish-2fa/locked.php`). While a user is locked, even a correct code is refused and a fresh password login lands on the same page. Applies to setup and challenge, for TOTP, email and backup codes. Empty submissions are not counted. Each check runs under a per-user MySQL `GET_LOCK()`, so parallel requests can't each get a guess checked against the same count. Each wrong code is written to the PHP error log and fires the new `radish_2fa_verification_failed` action (`$user_id`, `$count`). A password reset, the admin **Reset 2FA** action and `wp radish-2fa disable` clear the lock.
+- REST and XML-RPC password logins for 2FA users could get past the block by sending any `Authorization: Basic` header. `Auth\ApiLogin` now only lets a login through when WordPress core authenticated that same user with an application password in the same request (`application_password_did_authenticate`).
+- A session now records that it passed 2FA (`radish_2fa_verified_at` on the session token, new `Auth\SessionGuard`). This catches every way to get a session without the challenge, such as another plugin calling `wp_set_auth_cookie()` or a session from before the role was enforced. For a user who requires 2FA, a session without the mark is handled as follows:
+  - Page views on the front end and in wp-admin (`template_redirect`, `admin_init`): the session is ended and the user is sent to the challenge, then back to the page they were on.
+  - Form submissions in wp-admin: the session is ended and a **Verification required** page explains that the changes were not saved, with a link to the challenge.
+  - AJAX and `admin-post.php`: refused with HTTP 401, so the session can't fetch a REST nonce or run actions.
+  - Cookie-authenticated REST requests: refused with HTTP 401 (`radish_2fa_verification_required`). Application passwords are unaffected.
+- Every login cookie that WordPress validates in a request (logged_in, auth, secure_auth) must point at a marked session, so pairing a verified cookie with an unverified one does not pass.
+- The new `radish_2fa_require_verified_session` filter (`$required`, `$user`, `$session`) lets a site exempt sessions it creates on purpose, for example a user-switching plugin.
+
+### Changed
+- Users who require 2FA but have not set it up are now also sent to setup from wp-admin, not only from the front end. After resetting their own 2FA on the profile screen, users go straight to setup.
+- When users change their own password, WordPress and WooCommerce replace their session. The new session keeps the 2FA mark, so they are not asked for their code again.
+- After upgrading, users who require 2FA are asked for their code once more on their next page view, because their existing sessions do not carry the new mark yet. A form submitted in wp-admin at that moment is not saved.
+
+### Tests
+- `AttemptLimitTest` covers the per-user window, the per-token counter (separate key, token hashed, 30-minute lifetime), both limits, expiry of old failures, clearing, the logging action and the database lock (per user, name within MySQL's 64 characters, timeout, databases without named locks).
+- `SessionGuardTest` and `SessionGuardRequestTest` cover marking (without mutating the input), verification of marked, unmarked, missing and bogus sessions, requests with several login cookies, carrying the mark over to a new session of the same user only, and the "Remember me" detection.
+- `ApiLoginTest` covers non-API logins, blocked password logins, the dummy Basic header, a real application password, and an application password of another user.
+- `EnforcementTest` now expects the `template_redirect`, `admin_init` and `rest_authentication_errors` hooks.
+
+### i18n
+- Dutch (`nl_NL`) translations for the locked page and the verification-required messages; `radish-2fa.pot` regenerated and `.mo` recompiled.
+
 ## [0.2.4] - 2026-10-09
 
 ### Security
@@ -88,7 +115,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `radish_2fa_totp_issuer` filter for customizing the TOTP app issuer label.
 - Dutch translation; `.pot` file shipped for additional locales.
 
-[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.4...HEAD
+[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.4...v0.3.0
 [0.2.4]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.1...v0.2.2
