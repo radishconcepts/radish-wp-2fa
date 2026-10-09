@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- On multisite, `Roles::user_requires_2fa()` only looked at the user's roles on the site where they logged in, while the auth cookie is valid on every site of the network. A user with an enforced role on one site could skip 2FA by logging in on another site (or the root site) where they had no enforced role, then open the admin of the first site. The check now collects the user's roles on every site they belong to, including archived, spammed and deleted sites, so a role anywhere on the network triggers 2FA. Single-site installs are unaffected.
+
+### Tests
+- `RolesTest` covers multisite: an enforced role on another site requires 2FA, unenforced roles on every site do not, a role on an archived site still counts, revoked capability flags are ignored, and the current site's in-memory roles still count.
+
 ## [0.2.3] - 2026-07-27
 
 ### Fixed

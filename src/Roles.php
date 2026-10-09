@@ -31,7 +31,39 @@ final class Roles {
 			return false;
 		}
 
-		return (bool) array_intersect( (array) $user->roles, $enforced );
+		return (bool) array_intersect( $this->roles_on_network( $user ), $enforced );
+	}
+
+	/**
+	 * Collect the user's roles on every site of the network they belong to.
+	 *
+	 * `$user->roles` only holds the roles on the current site, while the auth
+	 * cookie is valid network-wide. Checking the current site alone would let
+	 * a user skip 2FA by logging in on a site where they have no enforced role.
+	 * Archived, spammed and deleted sites are included on purpose: a role there
+	 * still triggers 2FA.
+	 *
+	 * @param WP_User $user User to look up.
+	 *
+	 * @return string[] Role keys, unique.
+	 */
+	private function roles_on_network( WP_User $user ): array {
+		$roles = (array) $user->roles;
+
+		if ( ! is_multisite() ) {
+			return $roles;
+		}
+
+		global $wpdb;
+
+		foreach ( get_blogs_of_user( $user->ID, true ) as $blog ) {
+			$caps = get_user_meta( $user->ID, $wpdb->get_blog_prefix( $blog->userblog_id ) . 'capabilities', true );
+			if ( is_array( $caps ) ) {
+				$roles = array_merge( $roles, array_keys( array_filter( $caps ) ) );
+			}
+		}
+
+		return array_values( array_unique( $roles ) );
 	}
 
 	private function user_is_disabled_via_constant( WP_User $user ): bool {

@@ -34,7 +34,7 @@ if ( ! defined( 'RADISH_2FA_VERSION' ) ) {
  *
  * @var array<string,mixed>
  */
-global $rt2fa_test_transients, $rt2fa_test_transient_ttls, $rt2fa_test_options, $rt2fa_test_user_meta, $rt2fa_test_super_admin, $rt2fa_test_actions, $rt2fa_test_mails;
+global $rt2fa_test_transients, $rt2fa_test_transient_ttls, $rt2fa_test_options, $rt2fa_test_user_meta, $rt2fa_test_super_admin, $rt2fa_test_actions, $rt2fa_test_mails, $rt2fa_test_multisite, $rt2fa_test_blogs;
 $rt2fa_test_transients     = [];
 $rt2fa_test_transient_ttls = [];
 $rt2fa_test_options      = [];
@@ -42,6 +42,8 @@ $rt2fa_test_user_meta    = [];
 $rt2fa_test_super_admin  = false;
 $rt2fa_test_actions      = [];
 $rt2fa_test_mails        = [];
+$rt2fa_test_multisite    = false;
+$rt2fa_test_blogs        = [];
 
 if ( ! function_exists( 'add_action' ) ) {
 	function add_action( string $hook, $callback, int $priority = 10, int $accepted_args = 1 ): bool {
@@ -85,9 +87,49 @@ if ( ! function_exists( 'delete_site_transient' ) ) {
 
 if ( ! function_exists( 'is_multisite' ) ) {
 	function is_multisite(): bool {
-		return false;
+		global $rt2fa_test_multisite;
+
+		return (bool) $rt2fa_test_multisite;
 	}
 }
+
+/**
+ * Network sites used by the multisite Roles tests, keyed by blog ID.
+ * Each entry: [ 'members' => int[], 'archived' => bool ].
+ */
+if ( ! function_exists( 'get_blogs_of_user' ) ) {
+	function get_blogs_of_user( int $user_id, bool $all = false ): array {
+		global $rt2fa_test_blogs;
+
+		$blogs = [];
+		foreach ( $rt2fa_test_blogs as $blog_id => $blog ) {
+			if ( ! in_array( $user_id, $blog['members'], true ) ) {
+				continue;
+			}
+			if ( ! $all && ! empty( $blog['archived'] ) ) {
+				continue;
+			}
+			$blogs[ $blog_id ] = (object) [ 'userblog_id' => $blog_id ];
+		}
+
+		return $blogs;
+	}
+}
+
+if ( ! class_exists( 'wpdb' ) ) {
+	class wpdb {
+		public string $base_prefix = 'wp_';
+
+		public function get_blog_prefix( $blog_id = null ): string {
+			$blog_id = (int) $blog_id;
+
+			return $blog_id <= 1 ? $this->base_prefix : $this->base_prefix . $blog_id . '_';
+		}
+	}
+}
+
+global $wpdb;
+$wpdb = new wpdb();
 
 if ( ! function_exists( 'get_option' ) ) {
 	function get_option( string $key, $default = false ) {
