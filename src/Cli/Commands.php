@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace RadishConcepts\TwoFactor\Cli;
 
 use RadishConcepts\TwoFactor\Roles;
+use RadishConcepts\TwoFactor\Security\AttemptLimit;
 use RadishConcepts\TwoFactor\Storage\UserMeta;
 use WP_CLI;
 use WP_Session_Tokens;
@@ -39,6 +40,7 @@ final class Commands {
 		$user = $this->resolve_user( $args[0] ?? '' );
 
 		UserMeta::instance()->clear( $user->ID );
+		AttemptLimit::instance()->clear( $user->ID );
 		WP_Session_Tokens::get_instance( $user->ID )->destroy_all();
 
 		WP_CLI::success( sprintf( '2FA reset for %s (#%d). Sessions terminated.', $user->user_login, $user->ID ) );

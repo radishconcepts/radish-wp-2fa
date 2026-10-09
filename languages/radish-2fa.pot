@@ -2,16 +2,16 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Radish 2FA 0.2.1\n"
+"Project-Id-Version: Radish 2FA 0.2.4\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/radish-2fa\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-29T21:10:23+00:00\n"
+"POT-Creation-Date: 2026-10-09T08:55:18+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.11.0\n"
+"X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: radish-2fa\n"
 
 #. Plugin Name of the plugin
@@ -44,70 +44,73 @@ msgstr ""
 msgid "https://www.radishconcepts.com"
 msgstr ""
 
-#: src/Admin/Reset.php:47
+#: src/Admin/Reset.php:48
 #: src/Admin/SelfManage.php:61
 #: templates/challenge-email.php:19
 #: templates/challenge.php:16
 msgid "Two-factor authentication"
 msgstr ""
 
-#: src/Admin/Reset.php:51
+#: src/Admin/Reset.php:52
 msgid "Two-factor authentication has been reset. The user must set it up again on next login."
 msgstr ""
 
-#: src/Admin/Reset.php:57
+#: src/Admin/Reset.php:58
 #: src/Admin/SelfManage.php:86
 msgid "Status"
 msgstr ""
 
-#: src/Admin/Reset.php:60
+#: src/Admin/Reset.php:61
 msgid "Active"
 msgstr ""
 
 #. translators: %s: date
-#: src/Admin/Reset.php:66
+#: src/Admin/Reset.php:67
+#, php-format
 msgid "Set up on %s."
 msgstr ""
 
 #. translators: %d: number of backup codes
-#: src/Admin/Reset.php:75
+#: src/Admin/Reset.php:76
+#, php-format
 msgid "%d backup code available."
 msgid_plural "%d backup codes available."
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: date/time
-#: src/Admin/Reset.php:84
+#: src/Admin/Reset.php:85
+#, php-format
 msgid "Last used: %s."
 msgstr ""
 
-#: src/Admin/Reset.php:91
+#: src/Admin/Reset.php:92
 msgid "Not set up."
 msgstr ""
 
-#: src/Admin/Reset.php:98
+#: src/Admin/Reset.php:99
 msgid "Reset"
 msgstr ""
 
-#: src/Admin/Reset.php:114
+#: src/Admin/Reset.php:115
 msgid "Are you sure you want to reset 2FA for this user? All sessions will be terminated and the user must set up 2FA again on next login."
 msgstr ""
 
-#: src/Admin/Reset.php:115
+#: src/Admin/Reset.php:116
 msgid "Reset two-factor authentication"
 msgstr ""
 
-#: src/Admin/Reset.php:118
+#: src/Admin/Reset.php:119
 msgid "Wipes the TOTP secret and backup codes and terminates all active sessions for this user."
 msgstr ""
 
-#: src/Admin/Reset.php:129
+#: src/Admin/Reset.php:130
 #: src/Admin/Settings.php:63
 #: src/Admin/Settings.php:157
 msgid "You do not have permission to do this."
 msgstr ""
 
-#: src/Admin/Reset.php:138
+#: src/Admin/Reset.php:139
 msgid "Invalid user."
 msgstr ""
 
@@ -117,6 +120,7 @@ msgstr ""
 
 #. translators: %s: human-readable label of the queued 2FA method
 #: src/Admin/SelfManage.php:75
+#, php-format
 msgid "A method change to %s is queued. You will be asked to set it up at your next sign-in; your current session keeps working with the active method."
 msgstr ""
 
@@ -231,41 +235,62 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: src/Auth/ApiLogin.php:47
+#: src/Auth/ApiLogin.php:59
 msgid "Password-based API login is disabled for accounts with two-factor authentication. Use an Application Password."
 msgstr ""
 
-#: src/Frontend/Controller.php:200
+#: src/Auth/Enforcement.php:108
+#: src/Auth/Enforcement.php:168
+msgid "This session has not passed two-factor authentication. Reload the page to verify your sign-in."
+msgstr ""
+
+#: src/Auth/Enforcement.php:157
+msgid "Your changes were not saved. For your security, confirm your sign-in with your verification code first, then submit the form again."
+msgstr ""
+
+#: src/Auth/Enforcement.php:158
+#: src/Auth/Enforcement.php:182
+msgid "Verification required"
+msgstr ""
+
+#: src/Auth/Enforcement.php:162
+#: src/Auth/Enforcement.php:186
+#: templates/challenge-email.php:26
+#: templates/challenge.php:23
+msgid "Enter verification code"
+msgstr ""
+
+#: src/Frontend/Controller.php:221
 msgid "Please choose a verification method."
 msgstr ""
 
-#: src/Frontend/Controller.php:224
+#: src/Frontend/Controller.php:256
 msgid "The code is incorrect. Please try again."
 msgstr ""
 
-#: src/Frontend/Controller.php:243
-#: src/Frontend/Controller.php:362
+#: src/Frontend/Controller.php:275
+#: src/Frontend/Controller.php:416
 msgid "A new code has been sent."
 msgstr ""
 
-#: src/Frontend/Controller.php:246
-#: src/Frontend/Controller.php:365
+#: src/Frontend/Controller.php:278
+#: src/Frontend/Controller.php:419
 msgid "You have requested too many codes. Please wait a bit and try again."
 msgstr ""
 
-#: src/Frontend/Controller.php:259
+#: src/Frontend/Controller.php:302
 msgid "The code is incorrect or expired. Please try again."
 msgstr ""
 
-#: src/Frontend/Controller.php:352
+#: src/Frontend/Controller.php:406
 msgid "The code is incorrect. Please try again or use a backup code."
 msgstr ""
 
-#: src/Frontend/Controller.php:385
+#: src/Frontend/Controller.php:450
 msgid "The code is incorrect or expired. Please try again or use a backup code."
 msgstr ""
 
-#: src/Frontend/Controller.php:533
+#: src/Frontend/Controller.php:687
 msgid "Template missing."
 msgstr ""
 
@@ -275,12 +300,14 @@ msgstr ""
 
 #. translators: %s: site name
 #: src/Security/EmailMailer.php:30
+#, php-format
 msgid "[%s] Your verification code"
 msgstr ""
 
 #. translators: %s: user login
 #: src/Security/EmailMailer.php:94
 #: src/Security/EmailMailer.php:178
+#, php-format
 msgid "Hi %s,"
 msgstr ""
 
@@ -291,6 +318,7 @@ msgstr ""
 #. translators: %d: minutes
 #: src/Security/EmailMailer.php:100
 #: src/Security/EmailMailer.php:188
+#, php-format
 msgid "This code expires in %d minute."
 msgid_plural "This code expires in %d minutes."
 msgstr[0] ""
@@ -339,13 +367,9 @@ msgstr ""
 msgid "I have saved my codes — continue"
 msgstr ""
 
-#: templates/challenge-email.php:26
-#: templates/challenge.php:23
-msgid "Enter verification code"
-msgstr ""
-
 #. translators: %s: masked email address
 #: templates/challenge-email.php:31
+#, php-format
 msgid "We sent a six-digit code to %s. No access to your inbox? Use a backup code instead."
 msgstr ""
 
@@ -362,6 +386,7 @@ msgstr ""
 #. translators: %d: seconds
 #: templates/challenge-email.php:55
 #: templates/setup-email.php:57
+#, php-format
 msgid "Send a new code (wait %ds)"
 msgstr ""
 
@@ -395,8 +420,25 @@ msgid "Your verification link has expired or has already been used. Sign in agai
 msgstr ""
 
 #: templates/expired.php:25
+#: templates/locked.php:37
 msgid "Go to login page"
 msgstr ""
+
+#: templates/locked.php:14
+msgid "Too many attempts"
+msgstr ""
+
+#: templates/locked.php:21
+msgid "Too many incorrect codes"
+msgstr ""
+
+#. translators: %d: number of minutes to wait
+#: templates/locked.php:26
+#, php-format
+msgid "For your security, verification is paused. Wait %d minute, then sign in again."
+msgid_plural "For your security, verification is paused. Wait %d minutes, then sign in again."
+msgstr[0] ""
+msgstr[1] ""
 
 #: templates/setup-email.php:21
 #: templates/setup-email.php:28
@@ -405,6 +447,7 @@ msgstr ""
 
 #. translators: %s: masked email address
 #: templates/setup-email.php:33
+#, php-format
 msgid "We sent a six-digit code to %s. Enter it below to finish setting up email verification."
 msgstr ""
 

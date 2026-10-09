@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace RadishConcepts\TwoFactor\Admin;
 
+use RadishConcepts\TwoFactor\Security\AttemptLimit;
 use RadishConcepts\TwoFactor\Storage\UserMeta;
 use WP_Session_Tokens;
 use WP_User;
@@ -139,6 +140,7 @@ final class Reset {
 		}
 
 		UserMeta::instance()->clear( $user->ID );
+		AttemptLimit::instance()->clear( $user->ID );
 		WP_Session_Tokens::get_instance( $user->ID )->destroy_all();
 
 		$redirect = add_query_arg( self::FLAG_QUERY_ARG, '1', get_edit_user_link( $user->ID ) );

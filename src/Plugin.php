@@ -10,8 +10,10 @@ use RadishConcepts\TwoFactor\Admin\Settings;
 use RadishConcepts\TwoFactor\Auth\ApiLogin;
 use RadishConcepts\TwoFactor\Auth\Enforcement;
 use RadishConcepts\TwoFactor\Auth\LoginInterceptor;
+use RadishConcepts\TwoFactor\Auth\SessionGuard;
 use RadishConcepts\TwoFactor\Cli\Commands;
 use RadishConcepts\TwoFactor\Frontend\Controller;
+use RadishConcepts\TwoFactor\Security\AttemptLimit;
 
 final class Plugin {
 
@@ -36,6 +38,8 @@ final class Plugin {
 		ApiLogin::instance()->register();
 		Controller::instance()->register();
 		Enforcement::instance()->register();
+		SessionGuard::instance()->register();
+		AttemptLimit::instance()->register();
 		Reset::instance()->register();
 		SelfManage::instance()->register();
 		Commands::instance()->register();

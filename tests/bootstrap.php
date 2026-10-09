@@ -22,6 +22,12 @@ if ( ! defined( 'MINUTE_IN_SECONDS' ) ) {
 if ( ! defined( 'HOUR_IN_SECONDS' ) ) {
 	define( 'HOUR_IN_SECONDS', 60 * MINUTE_IN_SECONDS );
 }
+if ( ! defined( 'DAY_IN_SECONDS' ) ) {
+	define( 'DAY_IN_SECONDS', 24 * HOUR_IN_SECONDS );
+}
+
+// Security logging (failed attempts) must not clutter the test output.
+ini_set( 'error_log', '/dev/null' );
 if ( ! defined( 'RADISH_2FA_DIR' ) ) {
 	define( 'RADISH_2FA_DIR', dirname( __DIR__ ) . '/' );
 }
@@ -55,6 +61,33 @@ if ( ! function_exists( 'add_action' ) ) {
 		];
 
 		return true;
+	}
+}
+
+if ( ! function_exists( 'add_filter' ) ) {
+	function add_filter( string $hook, $callback, int $priority = 10, int $accepted_args = 1 ): bool {
+		return add_action( $hook, $callback, $priority, $accepted_args );
+	}
+}
+
+if ( ! function_exists( 'do_action' ) ) {
+	function do_action( string $hook, ...$args ): void {
+		global $rt2fa_test_actions;
+		foreach ( $rt2fa_test_actions as $action ) {
+			if ( $action['hook'] === $hook ) {
+				call_user_func_array( $action['callback'], $args );
+			}
+		}
+	}
+}
+
+if ( ! class_exists( 'WP_Error' ) ) {
+	class WP_Error {
+		public function __construct( public string $code = '', public string $message = '', public $data = '' ) {}
+
+		public function get_error_code(): string {
+			return $this->code;
+		}
 	}
 }
 
@@ -125,11 +158,64 @@ if ( ! class_exists( 'wpdb' ) ) {
 
 			return $blog_id <= 1 ? $this->base_prefix : $this->base_prefix . $blog_id . '_';
 		}
+
+		/** @var string[] Queries seen by get_var(), for the AttemptLimit lock tests. */
+		public array $queries = [];
+
+		/** What GET_LOCK() answers: '1' acquired, '0' timed out, null unsupported. */
+		public ?string $lock_result = '1';
+
+		public function prepare( string $query, ...$args ): string {
+			return vsprintf( str_replace( [ '%s', '%d' ], [ "'%s'", '%d' ], $query ), $args );
+		}
+
+		public function get_var( string $query ) {
+			$this->queries[] = $query;
+
+			return str_starts_with( $query, 'SELECT GET_LOCK' ) ? $this->lock_result : '1';
+		}
 	}
 }
 
 global $wpdb;
 $wpdb = new wpdb();
+
+/**
+ * In-memory session store for SessionGuard tests: [ user_id => [ token => session ] ].
+ * $rt2fa_test_session_token is what wp_get_session_token() returns.
+ */
+global $rt2fa_test_sessions, $rt2fa_test_session_token;
+$rt2fa_test_sessions      = [];
+$rt2fa_test_session_token = '';
+
+if ( ! class_exists( 'WP_Session_Tokens' ) ) {
+	class WP_Session_Tokens {
+		private function __construct( private int $user_id ) {}
+
+		public static function get_instance( int $user_id ): self {
+			return new self( $user_id );
+		}
+
+		public function get( string $token ): ?array {
+			global $rt2fa_test_sessions;
+
+			return $rt2fa_test_sessions[ $this->user_id ][ $token ] ?? null;
+		}
+
+		public function destroy( string $token ): void {
+			global $rt2fa_test_sessions;
+			unset( $rt2fa_test_sessions[ $this->user_id ][ $token ] );
+		}
+	}
+}
+
+if ( ! function_exists( 'wp_get_session_token' ) ) {
+	function wp_get_session_token(): string {
+		global $rt2fa_test_session_token;
+
+		return (string) $rt2fa_test_session_token;
+	}
+}
 
 if ( ! function_exists( 'get_option' ) ) {
 	function get_option( string $key, $default = false ) {

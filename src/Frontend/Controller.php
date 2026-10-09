@@ -8,8 +8,10 @@ use RadishConcepts\TwoFactor\Activation;
 use RadishConcepts\TwoFactor\Admin\Settings;
 use RadishConcepts\TwoFactor\Auth\Nonce;
 use RadishConcepts\TwoFactor\Auth\RedirectTarget;
+use RadishConcepts\TwoFactor\Auth\SessionGuard;
 use RadishConcepts\TwoFactor\Methods\Method;
 use RadishConcepts\TwoFactor\Routes;
+use RadishConcepts\TwoFactor\Security\AttemptLimit;
 use RadishConcepts\TwoFactor\Security\BackupCodes;
 use RadishConcepts\TwoFactor\Security\EmailMailer;
 use RadishConcepts\TwoFactor\Security\EmailOtp;
@@ -20,6 +22,11 @@ use RadishConcepts\TwoFactor\Storage\UserMeta;
 use WP_User;
 
 final class Controller {
+
+	/** Outcomes of a code check under the attempt limit. */
+	private const CODE_OK     = 'ok';
+	private const CODE_WRONG  = 'wrong';
+	private const CODE_LOCKED = 'locked';
 
 	private static ?self $instance = null;
 
@@ -79,11 +86,20 @@ final class Controller {
 			exit;
 		}
 
+		$is_post = 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? 'GET' );
+
+		// Too many wrong codes for this user recently: don't even show the form.
+		// POSTs are checked inside verify_with_limit() instead, under the lock:
+		// reading the counter here would cache it for the rest of the request.
+		if ( ! $is_post && AttemptLimit::instance()->is_locked( $user->ID ) ) {
+			Nonce::instance()->consume( $token );
+			$this->render_locked();
+			exit;
+		}
+
 		// The visitor is demonstrably still working through the flow: restart the
 		// idle window so a slow (but real) attempt doesn't expire under them.
 		Nonce::instance()->touch( $token );
-
-		$is_post = 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? 'GET' );
 
 		switch ( $action ) {
 			case Routes::ACTION_SETUP:
@@ -225,7 +241,18 @@ final class Controller {
 		$secret = (string) ( $payload['pending_secret'] ?? '' );
 		$code   = isset( $_POST['code'] ) ? sanitize_text_field( wp_unslash( $_POST['code'] ) ) : '';
 
-		if ( '' === $secret || ! Totp::instance()->verify( $secret, $code ) ) {
+		$outcome = $this->verify_with_limit(
+			$token,
+			$user,
+			$code,
+			static fn (): bool => '' !== $secret && Totp::instance()->verify( $secret, $code )
+		);
+
+		if ( self::CODE_LOCKED === $outcome ) {
+			return;
+		}
+
+		if ( self::CODE_WRONG === $outcome ) {
 			$this->render_setup_totp( $token, $payload, $user, __( 'The code is incorrect. Please try again.', 'radish-2fa' ) );
 
 			return;
@@ -260,7 +287,18 @@ final class Controller {
 		$hash   = (string) ( $payload['email_code_hash'] ?? '' );
 		$expiry = (int) ( $payload['email_code_expires_at'] ?? 0 );
 
-		if ( ! EmailOtp::instance()->verify( $code, $hash, $expiry ) ) {
+		$outcome = $this->verify_with_limit(
+			$token,
+			$user,
+			$code,
+			static fn (): bool => EmailOtp::instance()->verify( $code, $hash, $expiry )
+		);
+
+		if ( self::CODE_LOCKED === $outcome ) {
+			return;
+		}
+
+		if ( self::CODE_WRONG === $outcome ) {
 			$this->render_setup_email( $token, $payload, $user, __( 'The code is incorrect or expired. Please try again.', 'radish-2fa' ), null );
 
 			return;
@@ -344,9 +382,20 @@ final class Controller {
 
 		$code = isset( $_POST['code'] ) ? sanitize_text_field( wp_unslash( $_POST['code'] ) ) : '';
 
-		if ( $this->verify_challenge_code( $user, $code, $payload ) ) {
+		$outcome = $this->verify_with_limit(
+			$token,
+			$user,
+			$code,
+			fn (): bool => $this->verify_challenge_code( $user, $code, $payload )
+		);
+
+		if ( self::CODE_OK === $outcome ) {
 			$this->complete_login( $token, $payload, $user );
 
+			return;
+		}
+
+		if ( self::CODE_LOCKED === $outcome ) {
 			return;
 		}
 
@@ -377,9 +426,20 @@ final class Controller {
 
 		$code = isset( $_POST['code'] ) ? sanitize_text_field( wp_unslash( $_POST['code'] ) ) : '';
 
-		if ( $this->verify_challenge_code( $user, $code, $payload ) ) {
+		$outcome = $this->verify_with_limit(
+			$token,
+			$user,
+			$code,
+			fn (): bool => $this->verify_challenge_code( $user, $code, $payload )
+		);
+
+		if ( self::CODE_OK === $outcome ) {
 			$this->complete_login( $token, $payload, $user );
 
+			return;
+		}
+
+		if ( self::CODE_LOCKED === $outcome ) {
 			return;
 		}
 
@@ -428,6 +488,59 @@ final class Controller {
 		UserMeta::instance()->consume_backup_code( $user->ID, $match );
 
 		return true;
+	}
+
+	/**
+	 * Check one code under the attempt limit.
+	 *
+	 * The whole check runs under a per-user database lock, and the counters are
+	 * first read inside it, so parallel requests can't each get a guess checked
+	 * against the same count. When the attempts are used up the token is
+	 * consumed and the locked page is rendered. An empty submission is no guess:
+	 * it isn't checked or counted.
+	 *
+	 * @param callable():bool $verify Checks the code; may consume a backup code.
+	 *
+	 * @return string One of the CODE_* constants.
+	 */
+	private function verify_with_limit( string $token, WP_User $user, string $code, callable $verify ): string {
+		if ( '' === trim( $code ) ) {
+			return self::CODE_WRONG;
+		}
+
+		$limit = AttemptLimit::instance();
+
+		// A parallel check of this user is still running after the lock timeout:
+		// don't check this code at all.
+		if ( ! $limit->acquire( $user->ID ) ) {
+			return self::CODE_WRONG;
+		}
+
+		try {
+			if ( AttemptLimit::is_exhausted( $limit->token_failures( $token ), $limit->user_failures( $user->ID ) ) ) {
+				return $this->lock_out( $token );
+			}
+
+			if ( $verify() ) {
+				return self::CODE_OK;
+			}
+
+			$user_failures  = $limit->record_failure( $user->ID );
+			$token_failures = $limit->record_token_failure( $token );
+
+			return AttemptLimit::is_exhausted( $token_failures, $user_failures )
+				? $this->lock_out( $token )
+				: self::CODE_WRONG;
+		} finally {
+			$limit->release( $user->ID );
+		}
+	}
+
+	private function lock_out( string $token ): string {
+		Nonce::instance()->consume( $token );
+		$this->render_locked();
+
+		return self::CODE_LOCKED;
 	}
 
 	// ──────────────────────────────────────────────────────────────────────
@@ -523,8 +636,11 @@ final class Controller {
 		// Successful verification proves it's really this user — drop the email
 		// rate-limit so the next sign-in can immediately request a fresh code.
 		EmailRateLimit::instance()->clear( $user->ID );
+		AttemptLimit::instance()->clear( $user->ID );
 
-		wp_set_auth_cookie( $user->ID, ! empty( $payload['remember'] ), is_ssl() );
+		// Mark the new session as verified, so Enforcement can tell it apart from
+		// a session that was created without passing 2FA.
+		SessionGuard::instance()->set_verified_auth_cookie( $user, ! empty( $payload['remember'] ) );
 
 		wp_safe_redirect( $redirect_to );
 		exit;
@@ -554,6 +670,13 @@ final class Controller {
 	private function render_expired(): void {
 		status_header( 410 );
 		$this->render_template( 'expired.php', [] );
+	}
+
+	private function render_locked(): void {
+		status_header( 429 );
+		$this->render_template( 'locked.php', [
+			'minutes' => (int) ( AttemptLimit::WINDOW_SECONDS / MINUTE_IN_SECONDS ),
+		] );
 	}
 
 	private function render_template( string $name, array $vars ): void {

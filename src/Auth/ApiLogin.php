@@ -10,12 +10,17 @@ use WP_User;
 
 /**
  * Block REST/XML-RPC password logins for users that require 2FA.
- * Application Passwords (HTTP Basic) are still allowed — that's the supported
- * machine-to-machine path for 2FA-protected accounts.
+ * Application Passwords are still allowed: that's the supported
+ * machine-to-machine path for 2FA-protected accounts. Only a login that core
+ * itself authenticated with an application password counts; the mere presence
+ * of an `Authorization: Basic` header proves nothing.
  */
 final class ApiLogin {
 
 	private static ?self $instance = null;
+
+	/** User that core authenticated with an application password during this request. */
+	private ?int $application_password_user_id = null;
 
 	public static function instance(): self {
 		return self::$instance ??= new self();
@@ -23,6 +28,13 @@ final class ApiLogin {
 
 	public function register(): void {
 		add_filter( 'authenticate', [ $this, 'block_password_api_login' ], 31, 1 );
+		add_action( 'application_password_did_authenticate', [ $this, 'remember_application_password_login' ], 10, 1 );
+	}
+
+	public function remember_application_password_login( $user ): void {
+		if ( $user instanceof WP_User ) {
+			$this->application_password_user_id = (int) $user->ID;
+		}
 	}
 
 	public function block_password_api_login( $user ) {
@@ -38,7 +50,7 @@ final class ApiLogin {
 			return $user;
 		}
 
-		if ( $this->is_application_password_attempt() ) {
+		if ( $this->authenticated_with_application_password( $user ) ) {
 			return $user;
 		}
 
@@ -54,10 +66,8 @@ final class ApiLogin {
 			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST );
 	}
 
-	private function is_application_password_attempt(): bool {
-		$auth = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
-
-		return is_string( $auth ) && stripos( $auth, 'Basic ' ) === 0;
+	public function authenticated_with_application_password( WP_User $user ): bool {
+		return (int) $user->ID === $this->application_password_user_id;
 	}
 
 	private function __construct() {}

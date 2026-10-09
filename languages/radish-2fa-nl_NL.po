@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Radish 2FA 0.2.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/radish-2fa\n"
-"POT-Creation-Date: 2026-04-29T21:01:54+00:00\n"
+"POT-Creation-Date: 2026-10-09T08:55:18+00:00\n"
 "PO-Revision-Date: 2026-04-28 00:00+0000\n"
 "Last-Translator: Radish Concepts\n"
 "Language-Team: Nederlands\n"
@@ -47,12 +47,12 @@ msgstr "Radish Concepts"
 msgid "https://www.radishconcepts.com"
 msgstr "https://www.radishconcepts.com"
 
-#: src/Admin/Reset.php:47 src/Admin/SelfManage.php:61
+#: src/Admin/Reset.php:48 src/Admin/SelfManage.php:61
 #: templates/challenge-email.php:19 templates/challenge.php:16
 msgid "Two-factor authentication"
 msgstr "Tweestapsverificatie"
 
-#: src/Admin/Reset.php:51
+#: src/Admin/Reset.php:52
 msgid ""
 "Two-factor authentication has been reset. The user must set it up again on "
 "next login."
@@ -60,40 +60,43 @@ msgstr ""
 "Tweestapsverificatie is gereset. De gebruiker moet bij de volgende login "
 "opnieuw instellen."
 
-#: src/Admin/Reset.php:57 src/Admin/SelfManage.php:86
+#: src/Admin/Reset.php:58 src/Admin/SelfManage.php:86
 msgid "Status"
 msgstr "Status"
 
-#: src/Admin/Reset.php:60
+#: src/Admin/Reset.php:61
 msgid "Active"
 msgstr "Actief"
 
 #. translators: %s: date
-#: src/Admin/Reset.php:66
+#: src/Admin/Reset.php:67
+#, php-format
 msgid "Set up on %s."
 msgstr "Ingesteld op %s."
 
 #. translators: %d: number of backup codes
-#: src/Admin/Reset.php:75
+#: src/Admin/Reset.php:76
+#, php-format
 msgid "%d backup code available."
 msgid_plural "%d backup codes available."
 msgstr[0] "%d back-upcode beschikbaar."
 msgstr[1] "%d back-upcodes beschikbaar."
 
 #. translators: %s: date/time
-#: src/Admin/Reset.php:84
+#: src/Admin/Reset.php:85
+#, php-format
 msgid "Last used: %s."
 msgstr "Laatst gebruikt: %s."
 
-#: src/Admin/Reset.php:91
+#: src/Admin/Reset.php:92
 msgid "Not set up."
 msgstr "Nog niet ingesteld."
 
-#: src/Admin/Reset.php:98
+#: src/Admin/Reset.php:99
 msgid "Reset"
 msgstr "Reset"
 
-#: src/Admin/Reset.php:114
+#: src/Admin/Reset.php:115
 msgid ""
 "Are you sure you want to reset 2FA for this user? All sessions will be "
 "terminated and the user must set up 2FA again on next login."
@@ -102,11 +105,11 @@ msgstr ""
 "worden beëindigd en de gebruiker moet bij de volgende login opnieuw 2FA "
 "instellen."
 
-#: src/Admin/Reset.php:115
+#: src/Admin/Reset.php:116
 msgid "Reset two-factor authentication"
 msgstr "Reset tweestapsverificatie"
 
-#: src/Admin/Reset.php:118
+#: src/Admin/Reset.php:119
 msgid ""
 "Wipes the TOTP secret and backup codes and terminates all active sessions "
 "for this user."
@@ -114,11 +117,11 @@ msgstr ""
 "Wist het TOTP-secret en de back-upcodes en beëindigt alle actieve sessies "
 "van deze gebruiker."
 
-#: src/Admin/Reset.php:129 src/Admin/Settings.php:63 src/Admin/Settings.php:157
+#: src/Admin/Reset.php:130 src/Admin/Settings.php:63 src/Admin/Settings.php:157
 msgid "You do not have permission to do this."
 msgstr "Geen toegang."
 
-#: src/Admin/Reset.php:138
+#: src/Admin/Reset.php:139
 msgid "Invalid user."
 msgstr "Ongeldige gebruiker."
 
@@ -132,6 +135,7 @@ msgstr ""
 
 #. translators: %s: human-readable label of the queued 2FA method
 #: src/Admin/SelfManage.php:75
+#, php-format
 msgid ""
 "A method change to %s is queued. You will be asked to set it up at your next "
 "sign-in; your current session keeps working with the active method."
@@ -270,7 +274,7 @@ msgstr "Verplicht 2FA voor alle super admins (sterk aanbevolen)"
 msgid "Save"
 msgstr "Opslaan"
 
-#: src/Auth/ApiLogin.php:47
+#: src/Auth/ApiLogin.php:59
 msgid ""
 "Password-based API login is disabled for accounts with two-factor "
 "authentication. Use an Application Password."
@@ -278,38 +282,63 @@ msgstr ""
 "API-login via wachtwoord is uitgeschakeld voor accounts met "
 "tweestapsverificatie. Gebruik een Application Password."
 
-#: src/Frontend/Controller.php:200
+#: src/Auth/Enforcement.php:108 src/Auth/Enforcement.php:168
+msgid ""
+"This session has not passed two-factor authentication. Reload the page to "
+"verify your sign-in."
+msgstr ""
+"Deze sessie heeft de tweestapsverificatie niet doorlopen. Herlaad de pagina "
+"om je inlog te bevestigen."
+
+#: src/Auth/Enforcement.php:157
+msgid ""
+"Your changes were not saved. For your security, confirm your sign-in with "
+"your verification code first, then submit the form again."
+msgstr ""
+"Je wijzigingen zijn niet opgeslagen. Bevestig voor je veiligheid eerst je "
+"inlog met je verificatiecode en verstuur het formulier daarna opnieuw."
+
+#: src/Auth/Enforcement.php:158 src/Auth/Enforcement.php:182
+msgid "Verification required"
+msgstr "Verificatie vereist"
+
+#: src/Auth/Enforcement.php:162 src/Auth/Enforcement.php:186
+#: templates/challenge-email.php:26 templates/challenge.php:23
+msgid "Enter verification code"
+msgstr "Verificatiecode invoeren"
+
+#: src/Frontend/Controller.php:221
 msgid "Please choose a verification method."
 msgstr "Kies een verificatiemethode."
 
-#: src/Frontend/Controller.php:224
+#: src/Frontend/Controller.php:256
 msgid "The code is incorrect. Please try again."
 msgstr "De code klopt niet. Probeer het opnieuw."
 
-#: src/Frontend/Controller.php:243 src/Frontend/Controller.php:362
+#: src/Frontend/Controller.php:275 src/Frontend/Controller.php:416
 msgid "A new code has been sent."
 msgstr "Er is een nieuwe code verstuurd."
 
-#: src/Frontend/Controller.php:246 src/Frontend/Controller.php:365
+#: src/Frontend/Controller.php:278 src/Frontend/Controller.php:419
 msgid "You have requested too many codes. Please wait a bit and try again."
 msgstr "Je hebt te veel codes opgevraagd. Wacht even en probeer het opnieuw."
 
-#: src/Frontend/Controller.php:259
+#: src/Frontend/Controller.php:302
 msgid "The code is incorrect or expired. Please try again."
 msgstr "De code is onjuist of verlopen. Probeer het opnieuw."
 
-#: src/Frontend/Controller.php:352
+#: src/Frontend/Controller.php:406
 msgid "The code is incorrect. Please try again or use a backup code."
 msgstr "De code klopt niet. Probeer het opnieuw of gebruik een back-upcode."
 
-#: src/Frontend/Controller.php:385
+#: src/Frontend/Controller.php:450
 msgid ""
 "The code is incorrect or expired. Please try again or use a backup code."
 msgstr ""
 "De code is onjuist of verlopen. Probeer het opnieuw of gebruik een back-"
 "upcode."
 
-#: src/Frontend/Controller.php:533
+#: src/Frontend/Controller.php:687
 msgid "Template missing."
 msgstr "Template ontbreekt."
 
@@ -319,11 +348,13 @@ msgstr "Authenticator-app"
 
 #. translators: %s: site name
 #: src/Security/EmailMailer.php:30
+#, php-format
 msgid "[%s] Your verification code"
 msgstr "[%s] Je verificatiecode"
 
 #. translators: %s: user login
 #: src/Security/EmailMailer.php:94 src/Security/EmailMailer.php:178
+#, php-format
 msgid "Hi %s,"
 msgstr "Hallo %s,"
 
@@ -333,6 +364,7 @@ msgstr "Gebruik onderstaande code om in te loggen."
 
 #. translators: %d: minutes
 #: src/Security/EmailMailer.php:100 src/Security/EmailMailer.php:188
+#, php-format
 msgid "This code expires in %d minute."
 msgid_plural "This code expires in %d minutes."
 msgstr[0] "Deze code verloopt over %d minuut."
@@ -384,12 +416,9 @@ msgstr "Deze codes worden hierna nooit meer getoond."
 msgid "I have saved my codes — continue"
 msgstr "Ik heb mijn codes opgeslagen — doorgaan"
 
-#: templates/challenge-email.php:26 templates/challenge.php:23
-msgid "Enter verification code"
-msgstr "Verificatiecode invoeren"
-
 #. translators: %s: masked email address
 #: templates/challenge-email.php:31
+#, php-format
 msgid ""
 "We sent a six-digit code to %s. No access to your inbox? Use a backup code "
 "instead."
@@ -407,6 +436,7 @@ msgstr "Inloggen"
 
 #. translators: %d: seconds
 #: templates/challenge-email.php:55 templates/setup-email.php:57
+#, php-format
 msgid "Send a new code (wait %ds)"
 msgstr "Stuur een nieuwe code (wacht %ds)"
 
@@ -444,9 +474,33 @@ msgstr ""
 "Je verificatielink is verlopen of al gebruikt. Log opnieuw in om door te "
 "gaan."
 
-#: templates/expired.php:25
+#: templates/expired.php:25 templates/locked.php:37
 msgid "Go to login page"
 msgstr "Naar inlogpagina"
+
+#: templates/locked.php:14
+msgid "Too many attempts"
+msgstr "Te veel pogingen"
+
+#: templates/locked.php:21
+msgid "Too many incorrect codes"
+msgstr "Te veel onjuiste codes"
+
+#. translators: %d: number of minutes to wait
+#: templates/locked.php:26
+#, php-format
+msgid ""
+"For your security, verification is paused. Wait %d minute, then sign in "
+"again."
+msgid_plural ""
+"For your security, verification is paused. Wait %d minutes, then sign in "
+"again."
+msgstr[0] ""
+"Voor je veiligheid is de verificatie gepauzeerd. Wacht %d minuut en log "
+"daarna opnieuw in."
+msgstr[1] ""
+"Voor je veiligheid is de verificatie gepauzeerd. Wacht %d minuten en log "
+"daarna opnieuw in."
 
 #: templates/setup-email.php:21 templates/setup-email.php:28
 msgid "Confirm your email"
@@ -454,6 +508,7 @@ msgstr "Bevestig je e-mailadres"
 
 #. translators: %s: masked email address
 #: templates/setup-email.php:33
+#, php-format
 msgid ""
 "We sent a six-digit code to %s. Enter it below to finish setting up email "
 "verification."
