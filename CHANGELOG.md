@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-20
+
 ### Security
 - A 2FA token now only opens the route of its own step. The challenge token issued after the password step to users who already have 2FA could open `/2fa/setup/` instead, enrol a new authenticator over the user's own secret and backup codes, and sign in, so the password alone was enough. `Controller::route()` now checks the token's mode against the route (new `Routes::action_for_mode()` and `Routes::url_for_action()`) and redirects a token on the wrong route to its own. Setup and backup tokens belong to setup, challenge tokens to the challenge; a token with an unknown mode gets the expired page.
 - A setup token of a user who has enrolled since it was issued is spent and shows the expired page, so setup can never replace an existing secret.
@@ -122,7 +124,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `radish_2fa_totp_issuer` filter for customizing the TOTP app issuer label.
 - Dutch translation; `.pot` file shipped for additional locales.
 
-[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.4...v0.3.0
 [0.2.4]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.2...v0.2.3

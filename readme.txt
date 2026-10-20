@@ -3,7 +3,7 @@ Contributors: radishconcepts
 Tags: two-factor-authentication, 2fa, totp, security, multisite
 Requires at least: 6.2
 Tested up to: 6.7
-Stable tag: 0.3.0
+Stable tag: 0.3.1
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -103,6 +103,9 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 <!-- TODO: Add screenshots. Recommended: (1) the role-enforcement settings page, (2) the frontend /2fa/setup page with QR code, (3) the /2fa/challenge page, (4) the backup codes screen, (5) the user-edit reset block. Name files screenshot-1.png, screenshot-2.png, etc. in the /assets/ directory. -->
 
 == Changelog ==
+
+= 0.3.1 =
+* Security: A sign-in link only opens the step it was made for. Someone who knew only the password could open the setup page with the link meant for entering the code, register their own authenticator and sign in. Setup is now also refused for users who already have two-factor authentication.
 
 = 0.3.0 =
 * Security: Wrong verification codes are limited to 5 per sign-in attempt and 10 per user in 15 minutes. After that a "Too many incorrect codes" page is shown and the user has to wait before signing in again. A password reset lifts the limit.
