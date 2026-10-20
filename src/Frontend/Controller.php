@@ -86,6 +86,28 @@ final class Controller {
 			exit;
 		}
 
+		// A token only opens the route of its own step. Send it there instead of
+		// serving it, so a challenge token can never reach setup.
+		$expected_action = Routes::action_for_mode( (string) $payload['mode'] );
+		if ( '' === $expected_action ) {
+			$this->render_expired();
+			exit;
+		}
+
+		if ( $expected_action !== $action ) {
+			wp_safe_redirect( Routes::url_for_action( $expected_action, $token ) );
+			exit;
+		}
+
+		// Setup replaces the user's secret and backup codes, so it is only for
+		// users who have no 2FA yet. A setup token of a user who has enrolled
+		// since it was issued is spent.
+		if ( Nonce::MODE_SETUP === $payload['mode'] && UserMeta::instance()->is_enrolled( $user->ID ) ) {
+			Nonce::instance()->consume( $token );
+			$this->render_expired();
+			exit;
+		}
+
 		$is_post = 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? 'GET' );
 
 		// Too many wrong codes for this user recently: don't even show the form.

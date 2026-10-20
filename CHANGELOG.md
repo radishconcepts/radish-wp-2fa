@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- A 2FA token now only opens the route of its own step. The challenge token issued after the password step to users who already have 2FA could open `/2fa/setup/` instead, enrol a new authenticator over the user's own secret and backup codes, and sign in, so the password alone was enough. `Controller::route()` now checks the token's mode against the route (new `Routes::action_for_mode()` and `Routes::url_for_action()`) and redirects a token on the wrong route to its own. Setup and backup tokens belong to setup, challenge tokens to the challenge; a token with an unknown mode gets the expired page.
+- A setup token of a user who has enrolled since it was issued is spent and shows the expired page, so setup can never replace an existing secret.
+
+### Tests
+- `RoutesTest` covers the mode-to-route mapping and the route URLs.
+
 ## [0.3.0] - 2026-10-09
 
 ### Security
