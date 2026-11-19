@@ -149,6 +149,18 @@ if ( ! function_exists( 'get_blogs_of_user' ) ) {
 	}
 }
 
+if ( ! defined( 'OBJECT' ) ) {
+	define( 'OBJECT', 'OBJECT' );
+}
+if ( ! defined( 'ARRAY_A' ) ) {
+	define( 'ARRAY_A', 'ARRAY_A' );
+}
+if ( ! function_exists( 'wp_json_encode' ) ) {
+	function wp_json_encode( $value, int $flags = 0 ) {
+		return json_encode( $value, $flags );
+	}
+}
+
 if ( ! class_exists( 'wpdb' ) ) {
 	class wpdb {
 		public string $base_prefix = 'wp_';
@@ -173,6 +185,57 @@ if ( ! class_exists( 'wpdb' ) ) {
 			$this->queries[] = $query;
 
 			return str_starts_with( $query, 'SELECT GET_LOCK' ) ? $this->lock_result : '1';
+		}
+
+		public string $usermeta = 'wp_usermeta';
+
+		public function esc_like( string $text ): string {
+			return addcslashes( $text, '_%\\' );
+		}
+
+		/**
+		 * Answers the one usermeta lookup Nonce makes: the row holding a meta key.
+		 */
+		public function get_row( string $query, $output = OBJECT ) {
+			global $rt2fa_test_user_meta;
+
+			if ( ! preg_match( "/meta_key = '([^']+)'/", $query, $match ) ) {
+				return null;
+			}
+
+			foreach ( $rt2fa_test_user_meta as $user_id => $meta ) {
+				if ( array_key_exists( $match[1], $meta ) ) {
+					return [ 'user_id' => (string) $user_id, 'meta_value' => $meta[ $match[1] ] ];
+				}
+			}
+
+			return null;
+		}
+
+		/**
+		 * Answers Nonce's purge query: one user's meta rows whose key starts with
+		 * one of the LIKE prefixes in the query.
+		 */
+		public function get_results( string $query, $output = OBJECT ): array {
+			global $rt2fa_test_user_meta;
+
+			if ( ! preg_match( '/user_id = (\d+)/', $query, $user ) ) {
+				return [];
+			}
+			preg_match_all( "/LIKE '([^']+)%'/", $query, $likes );
+			$prefixes = array_map( 'stripslashes', $likes[1] );
+
+			$rows = [];
+			foreach ( $rt2fa_test_user_meta[ (int) $user[1] ] ?? [] as $key => $value ) {
+				foreach ( $prefixes as $prefix ) {
+					if ( str_starts_with( (string) $key, $prefix ) ) {
+						$rows[] = [ 'meta_key' => (string) $key, 'meta_value' => $value ];
+						break;
+					}
+				}
+			}
+
+			return $rows;
 		}
 	}
 }
