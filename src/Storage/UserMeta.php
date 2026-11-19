@@ -12,12 +12,20 @@ use RadishConcepts\TwoFactor\Security\Crypto;
  */
 final class UserMeta {
 
-	public const META_SECRET         = '_radish_2fa_secret';
-	public const META_ENROLLED_AT    = '_radish_2fa_enrolled_at';
-	public const META_BACKUP_CODES   = '_radish_2fa_backup_codes';
-	public const META_LAST_USED_AT   = '_radish_2fa_last_used_at';
-	public const META_METHOD         = '_radish_2fa_method';
-	public const META_PENDING_METHOD = '_radish_2fa_pending_method';
+	public const META_SECRET             = '_radish_2fa_secret';
+	public const META_ENROLLED_AT        = '_radish_2fa_enrolled_at';
+	public const META_BACKUP_CODES       = '_radish_2fa_backup_codes';
+	public const META_LAST_USED_AT       = '_radish_2fa_last_used_at';
+	public const META_METHOD             = '_radish_2fa_method';
+	public const META_PENDING_METHOD     = '_radish_2fa_pending_method';
+	public const META_SETUP_RESTARTED_AT = '_radish_2fa_setup_restarted_at';
+
+	/**
+	 * How long a restarted setup still earns a notice. Long enough to cover the
+	 * redirect to the new setup page, short enough that a user who walked away
+	 * isn't told about it the next day.
+	 */
+	public const SETUP_RESTART_NOTICE_TTL = 15 * MINUTE_IN_SECONDS;
 
 	private static ?self $instance = null;
 
@@ -89,6 +97,31 @@ final class UserMeta {
 		delete_user_meta( $user_id, self::META_LAST_USED_AT );
 		delete_user_meta( $user_id, self::META_METHOD );
 		delete_user_meta( $user_id, self::META_PENDING_METHOD );
+		delete_user_meta( $user_id, self::META_SETUP_RESTARTED_AT );
+	}
+
+	/**
+	 * Remember that this user's setup token vanished before setup finished, so
+	 * the next setup page can say its QR code (or emailed code) is a new one.
+	 * Kept in user meta rather than a transient: the token itself is usually
+	 * lost to an object cache flush, which would take a transient with it.
+	 */
+	public function mark_setup_restarted( int $user_id ): void {
+		update_user_meta( $user_id, self::META_SETUP_RESTARTED_AT, time() );
+	}
+
+	/**
+	 * Whether a recent setup restart still has to be reported. Reports it once.
+	 */
+	public function take_setup_restarted( int $user_id ): bool {
+		$restarted_at = (int) get_user_meta( $user_id, self::META_SETUP_RESTARTED_AT, true );
+		if ( 0 === $restarted_at ) {
+			return false;
+		}
+
+		delete_user_meta( $user_id, self::META_SETUP_RESTARTED_AT );
+
+		return time() - $restarted_at <= self::SETUP_RESTART_NOTICE_TTL;
 	}
 
 	/**
