@@ -4,10 +4,21 @@ declare( strict_types=1 );
 
 namespace RadishConcepts\TwoFactor\Auth;
 
+use RadishConcepts\TwoFactor\Security\Crypto;
+
 /**
  * One-time login nonce, used to bridge the password-auth step and the 2FA
- * verification page. Stored in a site transient (network-wide on multisite),
- * keyed by SHA-256(token) so a DB read can't recover the token itself.
+ * verification page.
+ *
+ * Stored in user meta (network-wide on multisite), keyed by SHA-256(token) so
+ * a DB read can't recover the token itself, and encrypted because the payload
+ * can hold a pending TOTP secret or plaintext backup codes. Not in a transient:
+ * with a persistent object cache a transient lives only in the cache, so a
+ * `wp cache flush` mid-setup threw the pending secret away and the user's
+ * authenticator app was left with codes nothing would accept.
+ *
+ * Expiry is checked on every read. Rows nobody reads again are purged the next
+ * time the same user starts a flow.
  */
 final class Nonce {
 
@@ -28,8 +39,8 @@ final class Nonce {
 	 */
 	private const RECEIPT_TTL = 15 * MINUTE_IN_SECONDS;
 
-	private const PREFIX         = 'r2fa_n_';
-	private const RECEIPT_PREFIX = 'r2fa_c_';
+	private const PREFIX         = '_radish_2fa_flow_';
+	private const RECEIPT_PREFIX = '_radish_2fa_receipt_';
 
 	private static ?self $instance = null;
 
@@ -44,6 +55,8 @@ final class Nonce {
 	 */
 	public function create( int $user_id, string $mode, string $redirect_to, array $extra = [] ): string {
 		$token = bin2hex( random_bytes( 16 ) );
+
+		$this->purge_expired( $user_id );
 
 		$this->store(
 			$token,
@@ -107,7 +120,7 @@ final class Nonce {
 			return null;
 		}
 
-		$payload = get_site_transient( $this->key( $token ) );
+		$payload = $this->read( $this->key( $token ) );
 
 		return is_array( $payload ) && isset( $payload['user_id'], $payload['mode'] ) ? $payload : null;
 	}
@@ -117,7 +130,7 @@ final class Nonce {
 			return;
 		}
 
-		delete_site_transient( $this->key( $token ) );
+		$this->forget( $this->key( $token ) );
 	}
 
 	/**
@@ -138,7 +151,8 @@ final class Nonce {
 			return;
 		}
 
-		set_site_transient(
+		$this->write(
+			$user_id,
 			$this->receipt_key( $token ),
 			[
 				'user_id'     => $user_id,
@@ -158,7 +172,7 @@ final class Nonce {
 			return null;
 		}
 
-		$payload = get_site_transient( $this->receipt_key( $token ) );
+		$payload = $this->read( $this->receipt_key( $token ) );
 
 		return is_array( $payload ) && isset( $payload['user_id'] ) ? $payload : null;
 	}
@@ -181,7 +195,7 @@ final class Nonce {
 			return;
 		}
 
-		set_site_transient( $this->key( $token ), $payload, $ttl );
+		$this->write( (int) ( $payload['user_id'] ?? 0 ), $this->key( $token ), $payload, $ttl );
 	}
 
 	private function remaining_ttl( int $created_at ): int {
@@ -196,6 +210,131 @@ final class Nonce {
 
 	private function receipt_key( string $token ): string {
 		return self::RECEIPT_PREFIX . hash( 'sha256', $token );
+	}
+
+	/**
+	 * @param array<string,mixed> $data
+	 */
+	private function write( int $user_id, string $meta_key, array $data, int $ttl ): void {
+		if ( $user_id <= 0 ) {
+			return;
+		}
+
+		$record = wp_json_encode(
+			[
+				'expires_at' => time() + $ttl,
+				'data'       => $data,
+			]
+		);
+		if ( false === $record ) {
+			return;
+		}
+
+		update_user_meta( $user_id, $meta_key, Crypto::encrypt( $record ) );
+	}
+
+	/**
+	 * The stored data, or null when there is none or it has expired. An expired
+	 * or unreadable row is deleted on the way.
+	 *
+	 * @return array<string,mixed>|null
+	 */
+	private function read( string $meta_key ): ?array {
+		$row = $this->locate( $meta_key );
+		if ( null === $row ) {
+			return null;
+		}
+
+		$record = $this->unseal( $row['meta_value'] );
+		if ( null === $record ) {
+			delete_user_meta( $row['user_id'], $meta_key );
+
+			return null;
+		}
+
+		return $record['data'];
+	}
+
+	private function forget( string $meta_key ): void {
+		$row = $this->locate( $meta_key );
+		if ( null !== $row ) {
+			delete_user_meta( $row['user_id'], $meta_key );
+		}
+	}
+
+	/**
+	 * Find the row by its meta key alone: the token is all a request carries, the
+	 * user it belongs to is what the row says. Read from the database, not the
+	 * user meta cache, which would need the user ID first.
+	 *
+	 * @return array{user_id:int,meta_value:string}|null
+	 */
+	private function locate( string $meta_key ): ?array {
+		global $wpdb;
+
+		$row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT user_id, meta_value FROM {$wpdb->usermeta} WHERE meta_key = %s LIMIT 1", $meta_key ),
+			ARRAY_A
+		);
+
+		if ( ! is_array( $row ) ) {
+			return null;
+		}
+
+		return [
+			'user_id'    => (int) $row['user_id'],
+			'meta_value' => (string) $row['meta_value'],
+		];
+	}
+
+	/**
+	 * Drop the user's flows and receipts that expired without being read again,
+	 * such as a setup page left open in a tab nobody went back to.
+	 */
+	private function purge_expired( int $user_id ): void {
+		global $wpdb;
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT meta_key, meta_value FROM {$wpdb->usermeta} WHERE user_id = %d AND ( meta_key LIKE %s OR meta_key LIKE %s )",
+				$user_id,
+				$wpdb->esc_like( self::PREFIX ) . '%',
+				$wpdb->esc_like( self::RECEIPT_PREFIX ) . '%'
+			),
+			ARRAY_A
+		);
+
+		foreach ( is_array( $rows ) ? $rows : [] as $row ) {
+			if ( null === $this->unseal( (string) $row['meta_value'] ) ) {
+				delete_user_meta( $user_id, (string) $row['meta_key'] );
+			}
+		}
+	}
+
+	/**
+	 * Decrypt a stored row. Null when it can't be read or has expired.
+	 *
+	 * @return array{expires_at:int,data:array<string,mixed>}|null
+	 */
+	private function unseal( string $sealed ): ?array {
+		$plain = Crypto::decrypt( $sealed );
+		if ( null === $plain ) {
+			return null;
+		}
+
+		$record = json_decode( $plain, true );
+		if ( ! is_array( $record ) || ! is_array( $record['data'] ?? null ) ) {
+			return null;
+		}
+
+		if ( (int) ( $record['expires_at'] ?? 0 ) <= time() ) {
+			return null;
+		}
+
+		return [
+			'expires_at' => (int) $record['expires_at'],
+			'data'       => $record['data'],
+		];
 	}
 
 	private function __construct() {}

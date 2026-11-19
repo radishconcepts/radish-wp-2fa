@@ -36,7 +36,7 @@ The default WordPress profile page is overwhelming for non-technical editors. A 
 
 = Hard enforcement, explained =
 
-When a user with an enforced role signs in, the auth cookie is suppressed at the `send_auth_cookies` and `auth_cookie` filters until 2FA is verified. Login tokens live for 5 minutes, are single-use, and are stored under `sha256(token)` in `site_transient` so a database dump never exposes the token itself. There is no "skip" button and no per-user override.
+When a user with an enforced role signs in, the auth cookie is suppressed at the `send_auth_cookies` and `auth_cookie` filters until 2FA is verified. Login tokens live for 5 minutes, are single-use, and are stored encrypted in user meta under `sha256(token)`, so a database dump never exposes the token itself and an object cache flush doesn't end a flow halfway. There is no "skip" button and no per-user override.
 
 == Installation ==
 

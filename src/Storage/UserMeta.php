@@ -103,8 +103,8 @@ final class UserMeta {
 	/**
 	 * Remember that this user's setup token vanished before setup finished, so
 	 * the next setup page can say its QR code (or emailed code) is a new one.
-	 * Kept in user meta rather than a transient: the token itself is usually
-	 * lost to an object cache flush, which would take a transient with it.
+	 * Kept in user meta rather than a transient, so an object cache flush can't
+	 * drop it.
 	 */
 	public function mark_setup_restarted( int $user_id ): void {
 		update_user_meta( $user_id, self::META_SETUP_RESTARTED_AT, time() );

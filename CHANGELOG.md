@@ -8,13 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
-- A setup that restarts because its token vanished now says so. Tokens are site transients, so with a persistent object cache every cache flush (a deploy, a cron job) deletes the tokens of users who are halfway through setup. A logged-in user then got redirected to a new setup page with a new secret, identical in look to the old one, and every code from the authenticator entry they had just added was rejected as incorrect. `Controller::handle_stale_token()` now records the restart in user meta (`_radish_2fa_setup_restarted_at`, so it survives the same flush), and the next setup page shows a notice once: a new QR code for TOTP, only the newest email code for email. The notice expires after 15 minutes.
+- A 2FA token and its completion receipt are now stored in user meta instead of a site transient. With a persistent object cache (Redis, Memcached) a transient exists only in the cache, so a `wp cache flush` during setup, for example by a deploy, deleted the pending TOTP secret. The user's authenticator app then held a secret no page would accept, and every code was "incorrect". Rows are named `_radish_2fa_flow_{sha256(token)}` and `_radish_2fa_receipt_{sha256(token)}`, encrypted with the same key as the TOTP secret, and checked for expiry on every read; a user's expired rows are deleted the next time that user starts a flow. The idle and absolute lifetimes are unchanged.
+- A setup that restarts because its token expired now says so. A logged-in user used to be redirected to a new setup page with a new secret, identical in look to the old one, and every code from the authenticator entry they had just added was rejected as incorrect. `Controller::handle_stale_token()` now records the restart in user meta (`_radish_2fa_setup_restarted_at`), and the next setup page shows a notice once: a new QR code for TOTP, only the newest email code for email. The notice expires after 15 minutes.
 - The expired page for a stale setup link (visitor not logged in) tells the user to delete any authenticator entry they already added, because signing in again starts setup with a new code.
 
 ### Changed
 - `templates/setup.php` receives an `$info` variable and renders it like `setup-email.php` does. Theme overrides of `setup.php` need the same block to show the restart notice. `templates/expired.php` receives `$setup_expired`.
+- Tokens issued before the update are no longer recognised, so anyone halfway through a 2FA step at that moment signs in again.
+- Attempt counters (`r2fa_fail_*`, `r2fa_tfail_*`) and the email rate limit stay in site transients; a cache flush resets them.
 
 ### Tests
+- `NonceTest` covers a token and a receipt surviving a cache flush, encryption at rest, expiry and the purge of a user's expired rows.
 - `UserMetaSetupRestartTest` covers recording a restart, reporting it once, per user, dropping it after the notice window, and `UserMeta::clear()`.
 
 ## [0.3.1] - 2026-10-20

@@ -6,13 +6,15 @@ namespace RadishConcepts\TwoFactor\Tests;
 
 use PHPUnit\Framework\TestCase;
 use RadishConcepts\TwoFactor\Auth\Nonce;
+use RadishConcepts\TwoFactor\Security\Crypto;
 
 final class NonceTest extends TestCase {
 
 	protected function setUp(): void {
-		global $rt2fa_test_transients, $rt2fa_test_transient_ttls;
+		global $rt2fa_test_transients, $rt2fa_test_transient_ttls, $rt2fa_test_user_meta;
 		$rt2fa_test_transients     = [];
 		$rt2fa_test_transient_ttls = [];
+		$rt2fa_test_user_meta      = [];
 	}
 
 	public function test_create_returns_32_hex_token(): void {
@@ -90,14 +92,107 @@ final class NonceTest extends TestCase {
 	}
 
 	public function test_lookup_key_is_hashed(): void {
-		global $rt2fa_test_transients;
-
 		$token = Nonce::instance()->create( 1, Nonce::MODE_SETUP, '/' );
 
-		// The transient key must NOT contain the raw token.
-		foreach ( array_keys( $rt2fa_test_transients ) as $stored_key ) {
+		// The meta key must NOT contain the raw token.
+		foreach ( array_keys( $this->stored_meta( 1 ) ) as $stored_key ) {
 			self::assertStringNotContainsString( $token, $stored_key );
 		}
+	}
+
+	// ──────────────────────────────────────────────────────────────────────
+	//  Storage: user meta, so an object cache flush can't drop a flow
+	// ──────────────────────────────────────────────────────────────────────
+
+	public function test_nonce_survives_an_object_cache_flush(): void {
+		global $rt2fa_test_transients;
+
+		$token = Nonce::instance()->create( 3, Nonce::MODE_SETUP, '/', [ 'pending_secret' => 'JBSWY3DPEHPK3PXP' ] );
+
+		$rt2fa_test_transients = []; // What `wp cache flush` does to transients on Redis.
+
+		self::assertSame( 'JBSWY3DPEHPK3PXP', Nonce::instance()->peek( $token )['pending_secret'] ?? null );
+	}
+
+	public function test_receipt_survives_an_object_cache_flush(): void {
+		global $rt2fa_test_transients;
+
+		$token = Nonce::instance()->create( 3, Nonce::MODE_CHALLENGE, '/' );
+		Nonce::instance()->complete( $token, 3, '/wp-admin/' );
+
+		$rt2fa_test_transients = [];
+
+		self::assertSame( '/wp-admin/', Nonce::instance()->peek_completed( $token )['redirect_to'] ?? null );
+	}
+
+	public function test_payload_is_encrypted_at_rest(): void {
+		Nonce::instance()->create( 3, Nonce::MODE_SETUP, '/', [
+			'pending_secret' => 'JBSWY3DPEHPK3PXP',
+			'plain_codes'    => [ 'AAAA-BBBB' ],
+		] );
+
+		foreach ( $this->stored_meta( 3 ) as $value ) {
+			self::assertStringNotContainsString( 'JBSWY3DPEHPK3PXP', (string) $value );
+			self::assertStringNotContainsString( 'AAAA-BBBB', (string) $value );
+		}
+	}
+
+	public function test_an_expired_nonce_is_gone_and_its_row_deleted(): void {
+		$token = Nonce::instance()->create( 3, Nonce::MODE_CHALLENGE, '/' );
+		$this->expire( 3 );
+
+		self::assertNull( Nonce::instance()->peek( $token ) );
+		self::assertSame( [], $this->stored_meta( 3 ) );
+	}
+
+	public function test_an_expired_receipt_is_gone(): void {
+		$token = Nonce::instance()->create( 3, Nonce::MODE_CHALLENGE, '/' );
+		Nonce::instance()->complete( $token, 3, '/' );
+		$this->expire( 3 );
+
+		self::assertNull( Nonce::instance()->peek_completed( $token ) );
+	}
+
+	public function test_a_corrupt_row_reads_as_no_nonce(): void {
+		global $rt2fa_test_user_meta;
+
+		$token = Nonce::instance()->create( 3, Nonce::MODE_CHALLENGE, '/' );
+		$key   = array_key_first( $this->stored_meta( 3 ) );
+
+		$rt2fa_test_user_meta[3][ $key ] = 'not-a-sealed-payload';
+
+		self::assertNull( Nonce::instance()->peek( $token ) );
+	}
+
+	public function test_create_purges_the_users_expired_rows_only(): void {
+		$old   = Nonce::instance()->create( 3, Nonce::MODE_CHALLENGE, '/' );
+		$other = Nonce::instance()->create( 4, Nonce::MODE_CHALLENGE, '/' );
+		$this->expire( 3 );
+		$this->expire( 4 );
+
+		$fresh = Nonce::instance()->create( 3, Nonce::MODE_CHALLENGE, '/' );
+
+		self::assertCount( 1, $this->stored_meta( 3 ), 'the expired row of user 3 is purged' );
+		self::assertNotNull( Nonce::instance()->peek( $fresh ) );
+		self::assertCount( 1, $this->stored_meta( 4 ), 'another user is left alone' );
+		self::assertNull( Nonce::instance()->peek( $old ) );
+		self::assertNull( Nonce::instance()->peek( $other ) );
+	}
+
+	public function test_create_keeps_the_users_live_tokens(): void {
+		$first  = Nonce::instance()->create( 3, Nonce::MODE_SETUP, '/' );
+		$second = Nonce::instance()->create( 3, Nonce::MODE_SETUP, '/' );
+
+		self::assertNotNull( Nonce::instance()->peek( $first ), 'a second tab must not kill the first' );
+		self::assertNotNull( Nonce::instance()->peek( $second ) );
+	}
+
+	public function test_consume_deletes_the_row(): void {
+		$token = Nonce::instance()->create( 3, Nonce::MODE_CHALLENGE, '/' );
+
+		Nonce::instance()->consume( $token );
+
+		self::assertSame( [], $this->stored_meta( 3 ) );
 	}
 
 	// ──────────────────────────────────────────────────────────────────────
@@ -134,12 +229,12 @@ final class NonceTest extends TestCase {
 	}
 
 	public function test_touch_is_a_noop_for_unknown_tokens(): void {
-		global $rt2fa_test_transients;
+		global $rt2fa_test_user_meta;
 
 		Nonce::instance()->touch( 'never-issued' );
 		Nonce::instance()->touch( '' );
 
-		self::assertSame( [], $rt2fa_test_transients );
+		self::assertSame( [], $rt2fa_test_user_meta );
 	}
 
 	// ──────────────────────────────────────────────────────────────────────
@@ -174,12 +269,10 @@ final class NonceTest extends TestCase {
 	}
 
 	public function test_receipt_key_does_not_contain_the_raw_token(): void {
-		global $rt2fa_test_transients;
-
 		$token = Nonce::instance()->create( 1, Nonce::MODE_CHALLENGE, '/' );
 		Nonce::instance()->complete( $token, 1, '/' );
 
-		foreach ( array_keys( $rt2fa_test_transients ) as $stored_key ) {
+		foreach ( array_keys( $this->stored_meta( 1 ) ) as $stored_key ) {
 			self::assertStringNotContainsString( $token, $stored_key );
 		}
 	}
@@ -201,7 +294,7 @@ final class NonceTest extends TestCase {
 
 	/**
 	 * Backdate a stored nonce so age-dependent behaviour can be exercised without
-	 * waiting (the transient stub ignores TTLs, so age lives in the payload).
+	 * waiting.
 	 */
 	private function rewind_created_at( string $token, int $seconds ): void {
 		$payload               = Nonce::instance()->peek( $token );
@@ -211,8 +304,44 @@ final class NonceTest extends TestCase {
 	}
 
 	private function stored_ttl( string $token ): int {
-		global $rt2fa_test_transient_ttls;
+		$sealed = $this->stored_meta( 1 )[ '_radish_2fa_flow_' . hash( 'sha256', $token ) ];
 
-		return (int) $rt2fa_test_transient_ttls[ 'r2fa_n_' . hash( 'sha256', $token ) ];
+		return $this->unseal( $sealed )['expires_at'] - time();
+	}
+
+	/**
+	 * The user's flow and receipt rows, keyed by meta key.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function stored_meta( int $user_id ): array {
+		global $rt2fa_test_user_meta;
+
+		return array_filter(
+			$rt2fa_test_user_meta[ $user_id ] ?? [],
+			static fn( $key ) => str_starts_with( (string) $key, '_radish_2fa_flow_' ) || str_starts_with( (string) $key, '_radish_2fa_receipt_' ),
+			ARRAY_FILTER_USE_KEY
+		);
+	}
+
+	/**
+	 * Move every stored row of the user one second past its expiry.
+	 */
+	private function expire( int $user_id ): void {
+		global $rt2fa_test_user_meta;
+
+		foreach ( $this->stored_meta( $user_id ) as $key => $sealed ) {
+			$record               = $this->unseal( $sealed );
+			$record['expires_at'] = time() - 1;
+
+			$rt2fa_test_user_meta[ $user_id ][ $key ] = Crypto::encrypt( (string) json_encode( $record ) );
+		}
+	}
+
+	/**
+	 * @return array{expires_at:int,data:array<string,mixed>}
+	 */
+	private function unseal( string $sealed ): array {
+		return json_decode( (string) Crypto::decrypt( $sealed ), true );
 	}
 }

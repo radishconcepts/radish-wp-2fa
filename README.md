@@ -97,7 +97,7 @@ When you save, active sessions for users newly falling under enforcement are ter
          redirect to redirect_to
 ```
 
-Tokens live for 5 minutes, are single-use, and are stored in `site_transient` under `sha256(token)` so a database dump never reveals the token itself.
+Tokens live for 5 minutes, are single-use, and are stored encrypted in user meta under `sha256(token)`, so a database dump never reveals the token itself and an object cache flush doesn't end a flow halfway.
 
 ## Lockout recovery
 
