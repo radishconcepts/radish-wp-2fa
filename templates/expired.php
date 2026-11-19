@@ -2,6 +2,7 @@
 /**
  * @var string $css_url
  * @var string $site_name
+ * @var bool   $setup_expired
  */
 ?><!doctype html>
 <html lang="<?php echo esc_attr( get_bloginfo( 'language' ) ); ?>">
@@ -21,6 +22,11 @@
 		<p class="lead">
 			<?php esc_html_e( 'Your verification link has expired or has already been used. Sign in again to continue.', 'radish-2fa' ); ?>
 		</p>
+		<?php if ( ! empty( $setup_expired ) ) : ?>
+			<p>
+				<?php esc_html_e( 'After signing in you start the setup again with a new code. If you already added this account to an authenticator app, delete that entry first.', 'radish-2fa' ); ?>
+			</p>
+		<?php endif; ?>
 		<p class="r2fa-meta">
 			<a href="<?php echo esc_url( wp_login_url() ); ?>"><?php esc_html_e( 'Go to login page', 'radish-2fa' ); ?></a>
 		</p>

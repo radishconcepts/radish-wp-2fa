@@ -5,6 +5,7 @@
  * @var string  $secret
  * @var string  $qr_svg
  * @var ?string $error
+ * @var ?string $info
  * @var string  $css_url
  * @var string  $site_name
  */
@@ -29,6 +30,9 @@
 
 		<?php if ( ! empty( $error ) ) : ?>
 			<div class="r2fa-error"><?php echo esc_html( $error ); ?></div>
+		<?php endif; ?>
+		<?php if ( ! empty( $info ) ) : ?>
+			<div class="r2fa-info"><?php echo esc_html( $info ); ?></div>
 		<?php endif; ?>
 
 		<div class="r2fa-qr"><?php echo $qr_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Bacon QR generates safe SVG. ?></div>

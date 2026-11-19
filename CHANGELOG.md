@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- A setup that restarts because its token vanished now says so. Tokens are site transients, so with a persistent object cache every cache flush (a deploy, a cron job) deletes the tokens of users who are halfway through setup. A logged-in user then got redirected to a new setup page with a new secret, identical in look to the old one, and every code from the authenticator entry they had just added was rejected as incorrect. `Controller::handle_stale_token()` now records the restart in user meta (`_radish_2fa_setup_restarted_at`, so it survives the same flush), and the next setup page shows a notice once: a new QR code for TOTP, only the newest email code for email. The notice expires after 15 minutes.
+- The expired page for a stale setup link (visitor not logged in) tells the user to delete any authenticator entry they already added, because signing in again starts setup with a new code.
+
+### Changed
+- `templates/setup.php` receives an `$info` variable and renders it like `setup-email.php` does. Theme overrides of `setup.php` need the same block to show the restart notice. `templates/expired.php` receives `$setup_expired`.
+
+### Tests
+- `UserMetaSetupRestartTest` covers recording a restart, reporting it once, per user, dropping it after the notice window, and `UserMeta::clear()`.
+
 ## [0.3.1] - 2026-10-20
 
 ### Security

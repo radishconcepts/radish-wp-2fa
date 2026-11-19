@@ -76,7 +76,7 @@ final class Controller {
 		$payload = Nonce::instance()->peek( $token );
 
 		if ( null === $payload ) {
-			$this->handle_stale_token( $token );
+			$this->handle_stale_token( $token, $action );
 			exit;
 		}
 
@@ -189,12 +189,19 @@ final class Controller {
 	}
 
 	private function render_setup_totp( string $token, array $payload, WP_User $user, ?string $error ): void {
+		$info   = null;
 		$secret = (string) ( $payload['pending_secret'] ?? '' );
 		if ( '' === $secret ) {
 			// Lazy-generate a TOTP secret only once the user has committed to TOTP.
 			$secret  = Totp::instance()->generate_secret();
 			$payload = array_merge( $payload, [ 'pending_secret' => $secret ] );
 			Nonce::instance()->update( $token, $payload );
+
+			// The new QR code looks exactly like the one of the setup that expired,
+			// so without a word the user keeps typing codes from the old entry.
+			if ( UserMeta::instance()->take_setup_restarted( $user->ID ) ) {
+				$info = __( 'Your previous setup session expired, so this is a new QR code. If you already added this account to your authenticator app, delete that entry and scan this code.', 'radish-2fa' );
+			}
 		}
 
 		$qr_uri = Totp::instance()->get_qr_provisioning_uri( $user, $secret );
@@ -205,11 +212,16 @@ final class Controller {
 			'secret' => $secret,
 			'qr_svg' => Qr::svg( $qr_uri ),
 			'error'  => $error,
+			'info'   => $info,
 		] );
 	}
 
 	private function render_setup_email( string $token, array $payload, WP_User $user, ?string $error, ?string $info ): void {
 		$enabled_methods = Settings::instance()->enabled_methods();
+
+		if ( null === $info && UserMeta::instance()->take_setup_restarted( $user->ID ) ) {
+			$info = __( 'Your previous setup session expired. Only the code in the newest email works; codes from earlier emails no longer do.', 'radish-2fa' );
+		}
 
 		$this->render_template( 'setup-email.php', [
 			'token'            => $token,
@@ -674,24 +686,35 @@ final class Controller {
 	 * genuinely nothing to resume. Redirecting also answers the repeated POST with
 	 * a GET, which stops the browser from resubmitting it again.
 	 */
-	private function handle_stale_token( string $token ): void {
-		$target = RedirectTarget::after_stale_token(
-			Nonce::instance()->peek_completed( $token ),
-			is_user_logged_in()
-		);
+	private function handle_stale_token( string $token, string $action ): void {
+		$receipt  = Nonce::instance()->peek_completed( $token );
+		$is_setup = Routes::ACTION_SETUP === $action;
+		$target   = RedirectTarget::after_stale_token( $receipt, is_user_logged_in() );
 
 		if ( null === $target ) {
-			$this->render_expired();
+			$this->render_expired( $is_setup );
 
 			return;
+		}
+
+		// No receipt means setup never finished: the token expired or was lost
+		// (an object cache flush takes every token with it). The redirect lands
+		// on a new setup page with a new secret, so have that page say so.
+		$user_id = get_current_user_id();
+		if ( $is_setup && null === $receipt && ! UserMeta::instance()->is_enrolled( $user_id ) ) {
+			UserMeta::instance()->mark_setup_restarted( $user_id );
 		}
 
 		wp_safe_redirect( $target );
 	}
 
-	private function render_expired(): void {
+	/**
+	 * @param bool $setup_expired Whether the expired token belonged to setup, so
+	 *                            the page can warn about the code already scanned.
+	 */
+	private function render_expired( bool $setup_expired = false ): void {
 		status_header( 410 );
-		$this->render_template( 'expired.php', [] );
+		$this->render_template( 'expired.php', [ 'setup_expired' => $setup_expired ] );
 	}
 
 	private function render_locked(): void {
