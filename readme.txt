@@ -3,7 +3,7 @@ Contributors: radishconcepts
 Tags: two-factor-authentication, 2fa, totp, security, multisite
 Requires at least: 6.2
 Tested up to: 6.7
-Stable tag: 0.3.1
+Stable tag: 0.3.2
 Requires PHP: 8.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -103,6 +103,10 @@ WordPress 6.2 or higher and PHP 8.1 or higher. Libsodium is built into PHP from 
 <!-- TODO: Add screenshots. Recommended: (1) the role-enforcement settings page, (2) the frontend /2fa/setup page with QR code, (3) the /2fa/challenge page, (4) the backup codes screen, (5) the user-edit reset block. Name files screenshot-1.png, screenshot-2.png, etc. in the /assets/ directory. -->
 
 == Changelog ==
+
+= 0.3.2 =
+* Fix: A cache flush (for example during a deploy) no longer interrupts setting up two-factor authentication. Before, the new QR code was thrown away while the user was scanning it, and every code from their app was rejected as incorrect.
+* Fix: When a setup session does expire, the next page says the QR code is new and the old entry in the authenticator app should be deleted.
 
 = 0.3.1 =
 * Security: A sign-in link only opens the step it was made for. Someone who knew only the password could open the setup page with the link meant for entering the code, register their own authenticator and sign in. Setup is now also refused for users who already have two-factor authentication.

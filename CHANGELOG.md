@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-11-19
+
 ### Fixed
 - A 2FA token and its completion receipt are now stored in user meta instead of a site transient. With a persistent object cache (Redis, Memcached) a transient exists only in the cache, so a `wp cache flush` during setup, for example by a deploy, deleted the pending TOTP secret. The user's authenticator app then held a secret no page would accept, and every code was "incorrect". Rows are named `_radish_2fa_flow_{sha256(token)}` and `_radish_2fa_receipt_{sha256(token)}`, encrypted with the same key as the TOTP secret, and checked for expiry on every read; a user's expired rows are deleted the next time that user starts a flow. The idle and absolute lifetimes are unchanged.
 - A setup that restarts because its token expired now says so. A logged-in user used to be redirected to a new setup page with a new secret, identical in look to the old one, and every code from the authenticator entry they had just added was rejected as incorrect. `Controller::handle_stale_token()` now records the restart in user meta (`_radish_2fa_setup_restarted_at`), and the next setup page shows a notice once: a new QR code for TOTP, only the newest email code for email. The notice expires after 15 minutes.
@@ -138,7 +140,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `radish_2fa_totp_issuer` filter for customizing the TOTP app issuer label.
 - Dutch translation; `.pot` file shipped for additional locales.
 
-[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.4...v0.3.0
 [0.2.4]: https://github.com/radishconcepts/radish-wp-2fa/compare/v0.2.3...v0.2.4
